@@ -1,0 +1,7 @@
+key.txt
+snippet.py
+__pycache__/
+
+dyads/*
+!dyads/.gitkeep
+

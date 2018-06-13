@@ -1,0 +1,6 @@
+This is a simple python interface to the NYT Search API.
+
+Please enter your API key in the "key.txt" file.
+The scraper can be used directly, or through other scripts.
+
+To use directly, run like this:
