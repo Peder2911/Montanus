@@ -11,12 +11,14 @@
 import requests
 
 import sys
+import time
 
 import logging
 import json
 
 import scraper
 import jsonTools
+import synonymFetcher
 
 location = 'dyads/'
 filetype = '.csv'
@@ -54,7 +56,8 @@ if __name__ == '__main__':
             _,country = sys.argv
             args = {'glocations':country}
 
-        response=scraper.scrape(config['base_url'],args)
+
+        response=scraper.scrape(config['nyt_base_url'],args)
 
         if len(response) > 0:
             # Write to file
@@ -62,9 +65,22 @@ if __name__ == '__main__':
             jsonTools.jsonToCsv(json = response,filename = outFilename)
 
         else:
-            # Disambiguation here?
-            pass
+            wikiTitles = synonymFetcher.getWikiTitles(organization)
+            # Flip it to pop top results first
+            wikiTitles = [*reversed(wikiTitles)]
+            print(len(wikiTitles))
 
+            while len(response) == 0 and len(wikiTitles) != 0:
+                organization = wikiTitles.pop()
+                args['organizations'] = organization
+                print('Trying %s'%(organization))
+
+                response = scraper.scrape(config['nyt_base_url'],args)
+                time.sleep(config['interval'])
+
+                if len(response) > 0:
+                    outFilename = location + makeFilename(sys.argv[1:]) + filetype
+                    jsonTools.jsonToCsv(json = response,filename = outFilename)
 
     else:
         logging.critical('No arguments given')

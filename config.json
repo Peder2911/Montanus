@@ -1,4 +1,6 @@
 {
-  "base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
-  "interval": 1
+  "nyt_base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
+  "interval": 1,
+  "wiki_base_url": "https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
+  "wiki_default_limit": "10"
 }

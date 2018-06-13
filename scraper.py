@@ -76,7 +76,7 @@ def scrape(base,args):
             articles += page['response']['docs']
 
         return(articles)
-        
+
     else:
         logging.warning('%s and %s yielded no hits'%(args['glocations'],args['organizations']))
         return([])
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             _,country = sys.argv
             args = {'glocations':country}
 
-        response=scrape(config['base_url'],args)
+        response=scrape(config['nyt_base_url'],args)
         print(response)
 
     else:
