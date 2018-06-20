@@ -1,6 +1,51 @@
 {
   "nyt_base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
+  "guardian_base_url":"https://content.guardianapis.com/search",
   "interval": 1,
   "wiki_base_url": "https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
-  "wiki_default_limit": "10"
+  "wiki_default_limit": "10",
+  "retrylimit": 3,
+  "defaultTarget":"nyt",
+
+  "nyt":{
+    "base_url":"https://api.nytimes.com/svc/search/v2/articlesearch.json",
+    "keyTag":"?api-key=",
+    "queryTag":"&fq=",
+    "pageTag":"&page=",
+
+    "queryFormat":"dict",
+    "booleanInQuery":1,
+
+    "contentPath":["response","docs"],
+    "hitsPath":["response","meta","hits"],
+    "messagePath":["message"],
+    "okMessage":[""]
+  },
+
+  "guardian":{
+    "base_url":"https://content.guardianapis.com/search",
+    "keyTag":"?api-key=",
+    "queryTag":"&q=",
+    "pageTag":"&page=",
+
+    "queryFormat":"list",
+    "booleanInQuery":1,
+
+    "contentPath":["response","results"],
+    "hitsPath":["response","total"],
+    "messagePath":["message"],
+    "okMessage":["ok"]
+  },
+
+  "wikipedia":{
+    "base_url":"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
+    "keyTag":"",
+    "queryTag":"&srsearch=",
+
+    "queryFormat":"list",
+    "booleanInQuery":0
+  },
+
+  "options":["-t","--tgt","--target"]
+
 }

@@ -1,3 +1,5 @@
+# Not tested with current implementation
+
 import requests
 import json
 import sys

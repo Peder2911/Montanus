@@ -1,63 +1,62 @@
 #!../bin/python
 
 # Utility script
-# Accepts either one or two CL arguments
-# The first needs to be a country
-# The second can be an organization
+# Called like this: script.py source arguments*
+# The source needs to be a valid source (see config.json)
+# Arguments will either be formatted as dictionary-like arguments (key-value pairs)
+# or a list of arguments. This depends on the source.
 
 # TODO
-# This script also attempts to expand its vocabulary if the initial search gets no hits
+# Re-implement the suggesto-tron.
 
 import requests
 
 import sys
 import time
+from collections import deque
 
 import logging
 import json
 
 import scraper
-import jsonTools
 import synonymFetcher
+from tools import pageTools,fileTools
 
 location = 'dyads/'
 filetype = '.csv'
 
+#####################################
+
 with open('config.json') as file:
     config = json.loads(file.read())
 
-#####################################
-
-def makeFilename(args,filetype='csv'):
-    out = ''
-    first = True
-    for arg in args:
-        if not first:
-            out += '_'+arg
-        else:
-            out += arg
-            first = False
-
-    out = out.replace(' ','')
-
-    return(out)
+with open('keys.json') as file:
+    apiKeys = json.loads(file.read())
 
 #####################################
 
 if __name__ == '__main__':
 
+    args = deque(sys.argv[1:])
+    source = args.popleft()
+    args = args
+
+    response = scraper.directedScrape(source,args,config,apiKeys)
+
+    if len(response) > 0:
+        fileTools.writeResponse(response,args,source)
+    else:
+        logging.warning('Writing no hits')
+
+
+'''
+if __name__ == '__vain__':
+
     if len(sys.argv) >1:
 
-        if len(sys.argv) >2:
-            _,country, organization = sys.argv
-            args = {'glocations':country,'organizations':organization}
+        args = ['Mozambique','Renamo']
 
-        else:
-            _,country = sys.argv
-            args = {'glocations':country}
-
-
-        response=scraper.scrape(config['nyt_base_url'],args)
+        response=scraper.scrapePages(config['nyt_base_url'],args)
 
         if len(response) > 0:
             # Write to file
@@ -75,7 +74,7 @@ if __name__ == '__main__':
                 args['organizations'] = organization
                 print('Trying %s'%(organization))
 
-                response = scraper.scrape(config['nyt_base_url'],args)
+                response = scraper.scrapePages(config['nyt_base_url'],args)
                 time.sleep(config['interval'])
 
                 if len(response) > 0:
@@ -85,3 +84,4 @@ if __name__ == '__main__':
     else:
         logging.critical('No arguments given')
         sys.exit(1)
+'''

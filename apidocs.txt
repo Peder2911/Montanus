@@ -1,7 +1,0 @@
-This is some documentation for the NYT API lucene syntax used for searching through the fq-field.
-(query in config file).
-
-The default fields are body, headline or byline. That is: if no specifying field:word/phrase is 
-entered, the word/phrase is searched for in body, headline and byline.
-
-The boolean operators used to combine terms are OR (default), AND, AND NOT and (+/-).

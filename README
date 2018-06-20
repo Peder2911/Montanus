@@ -1,6 +1,6 @@
-This is a simple python interface to the NYT Search API.
+This is an interface to the NYT and Guardian APIs.
+The program gets data from these APIs, and writes it to csv-files in the "dyads"-
+folder. This data will eventually be analyzed in interesting ways!
 
-Please enter your API key in a file called "key.txt" in the root 
-directory.
-The scraper can be used directly, or through other scripts.
-
+Maintained by Peder Gotch Landsverk @ PRIO (Peace Research Institute of Oslo)
+pglandsverk@gmail.com

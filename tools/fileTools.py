@@ -1,6 +1,32 @@
-# Functions for "flattening" a JSON file, and writing it to a CSV file.
 
 import csv
+
+def makeFilename(args,source,filetype='csv'):
+
+    out = source+'_'
+    first = True
+
+    for arg in args:
+        if not first:
+            out += '_'+arg
+        else:
+            out += arg
+            first = False
+
+    # Remove whitespace
+    out = out.replace(' ','')
+
+    return(out)
+
+def writeResponse(response,args,source):
+    location = 'dyads/'
+    filetype = '.csv'
+
+    filename = makeFilename(args,source)
+
+    outFilename = location + filename + filetype
+
+    jsonToCsv(response,outFilename)
 
 def getColNames(json):
     return(json[0].keys())
@@ -15,7 +41,6 @@ def jsonToCsv(json,filename):
 
 
         for entry in json:
-
             row = []
 
             for col in colNames:
