@@ -1,7 +1,7 @@
 {
   "nyt_base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
   "guardian_base_url":"https://content.guardianapis.com/search",
-  "interval": 1.1,
+  "interval": 1.3,
   "wiki_base_url": "https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
   "wiki_default_limit": "10",
   "retrylimit": 3,

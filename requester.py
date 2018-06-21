@@ -16,6 +16,12 @@ import sys
 with open('config.json') as file:
     config = json.loads(file.read())
 
+with open('ucdp_conflicts_nonstates_actors.csv') as file:
+     reader = csv.reader(file)
+     organizations_countries = {}
+     for line in reader:
+         organizations_countries[line[1]] = line[2]
+
 if __name__ == '__main__':
 
     if len(sys.argv) > 1:
@@ -25,16 +31,12 @@ if __name__ == '__main__':
     skipRows = 1
     # Skip header
 
-    with open('dyads.csv','r') as file:
+    for organization,country in organizations_countries.items():
 
-        for row in csv.reader(file):
-            if skipRows>0:
-                skipRows-=1
-            else:
-                call = ['./getAndWrite.py']
-                call += [source]
-                call += ['glocations',row[1]]
-                call += ['organizations',row[2]]
+        call = ['./getAndWrite.py']
+        call += [source]
+        call += ['glocations',country]
+        call += ['organizations',organization]
 
-                subprocess.call(call)
-                time.sleep(1)
+        subprocess.call(call)
+        time.sleep(1)

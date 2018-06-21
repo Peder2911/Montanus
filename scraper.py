@@ -16,13 +16,14 @@ import logging
 
 from tools import pageTools,argvTools,urlTools
 
-import inspect
-import importlib
+#####################################
 
 with open('config.json') as file:
     config = json.loads(file.read())
 
 # Returns a dictionary of URL components, also containing the API key
+# TODO Should maybe be somewhere else?
+
 def gatherComponents(target,config,keys):
     components = config[target]
     components['key'] = keys[target]
@@ -34,9 +35,27 @@ def getPage(url):
     time.sleep(config['interval'])
     print('Getting %s'%(url))
     print('')
-    page = requests.get(url).text
+
+    try:
+        page = requests.get(url).text
+    except ConnectionError:
+        time.sleep(5)
+        page = requests.get(url).text
+
     page = json.loads(page)
     return(page)
+
+def retryPage(url,tries,maxTries):
+    if tries < maxTries:
+        tries += 1
+        time.sleep(1+tries)
+
+        try:
+             page = requests.get(url).text
+        except ConnectionError:
+            retryPage(url,tries,maxTries)
+
+
 
 #####################################
 
@@ -88,7 +107,7 @@ def scrapePages(targetSite,components,args,config):
 
 #####################################
 
-# This is the external function, that performs a scrape.
+# This is the external function, that performs scraping.
 # Arguments are always given in list format!
 
 def directedScrape(targetSite,arguments,config,apiKeys):
