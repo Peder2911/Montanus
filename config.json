@@ -1,7 +1,7 @@
 {
   "nyt_base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
   "guardian_base_url":"https://content.guardianapis.com/search",
-  "interval": 1,
+  "interval": 1.1,
   "wiki_base_url": "https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
   "wiki_default_limit": "10",
   "retrylimit": 3,
@@ -19,7 +19,8 @@
     "contentPath":["response","docs"],
     "hitsPath":["response","meta","hits"],
     "messagePath":["message"],
-    "okMessage":[""]
+    "statusPath":["status"],
+    "goodStatus":"OK"
   },
 
   "guardian":{
@@ -34,7 +35,8 @@
     "contentPath":["response","results"],
     "hitsPath":["response","total"],
     "messagePath":["message"],
-    "okMessage":["ok"]
+    "statusPath":["response","status"],
+    "goodStatus":"ok"
   },
 
   "wikipedia":{

@@ -6,8 +6,7 @@
 # Arguments will either be formatted as dictionary-like arguments (key-value pairs)
 # or a list of arguments. This depends on the source.
 
-# TODO
-# Re-implement the suggesto-tron.
+# TODO Re-implement the suggesto-tron.
 
 import requests
 

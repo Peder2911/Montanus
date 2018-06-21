@@ -18,17 +18,23 @@ with open('config.json') as file:
 
 if __name__ == '__main__':
 
-    args = deque(sys.argv[1:])
-    source = args.popleft()
+    if len(sys.argv) > 1:
+        args = deque(sys.argv[1:])
+
+    source = 'nyt'
+    skipRows = 1
+    # Skip header
 
     with open('dyads.csv','r') as file:
 
-        header = True
-
         for row in csv.reader(file):
-            if not header:
-                subprocess.call(['./dyadGetter.py',source,row[1],row[2]])
-                time.sleep(1)
+            if skipRows>0:
+                skipRows-=1
             else:
-                # Skip first row
-                header = False
+                call = ['./getAndWrite.py']
+                call += [source]
+                call += ['glocations',row[1]]
+                call += ['organizations',row[2]]
+
+                subprocess.call(call)
+                time.sleep(1)

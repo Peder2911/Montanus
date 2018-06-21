@@ -1,7 +1,13 @@
 
+# Functions that do things with returned data
+
 from collections import deque
 import logging
 import sys
+
+# Indexes through multiple indices
+# Also returns true (result) or false, making it a handy function to check the
+# path BUT REMEMBER : 0 == False (possible result), so use if multiIndex is False!!!
 
 def multiIndex(dictionary,indexList):
     indexDeque = deque(indexList)
@@ -16,6 +22,8 @@ def multiIndex(dictionary,indexList):
             return(False)
 
     return(dictionary)
+
+# Multiindex decorator that returns a function adapted to target site.
 
 def makeIndexer(target,pathType,config):
     path = config[target][pathType]
@@ -32,38 +40,36 @@ def makeIndexer(target,pathType,config):
 
     return(indexer)
 
+# Sniffing function for determining if a response is healthy or not.
+# Also adapted to target site.
+
 def makeChecker(target,config):
-    #TODO might need to redo...
 
-    goodPath = config[target]['contentPath']
+    components = config[target]
 
-    messagePath = config[target]['messagePath']
+    messagePath = components['messagePath']
+    statusPath = components['statusPath']
+    goodStatus = components['goodStatus']
 
-    useMessage = 'okMessage' in config[target]
-
-    if useMessage:
-        okMessage = config[target]['okMessage']
-    else:
-        pass
 
     def responseChecker(response):
-        # Check path "if path is valid"
 
         if multiIndex(response,messagePath) is not False:
             message = multiIndex(response,messagePath)
 
-            if useMessage:
-                if message == okMessage:
-                    logging.debug('got OK message')
-                    return(True)
-                else:
-                    logging.warning(message)
-                    return(False)
+            logging.warning(message)
+            return(False)
+
+        elif multiIndex(response,statusPath):
+            status = multiIndex(response,statusPath)
+            if status == goodStatus:
+                return(True)
             else:
-                # All messages are bad news
-                logging.warning(message)
-                return(False)
+                logging.warning('Bad status = %s'%(status))
         else:
-            return(True)
+            # TODO It CAN return "errors", but when?
+            logging.critical('Wierd response! (no status or message)')
+            logging.critical(response.keys())
+            return(False)
 
     return(responseChecker)
