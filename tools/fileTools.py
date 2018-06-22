@@ -1,5 +1,6 @@
 
 import csv
+import json
 
 def makeFilename(args,source,filetype='csv'):
 
@@ -51,3 +52,8 @@ def jsonToCsv(json,filename):
                     row.append('NA')
 
             writer.writerow(row)
+
+def readJsonFile(file):
+    with open(file) as targetFile:
+        jsonFile = json.loads(targetFile.read())
+    return(jsonFile)

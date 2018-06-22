@@ -12,15 +12,23 @@
     "keyTag":"?api-key=",
     "queryTag":"&fq=",
     "pageTag":"&page=",
+    "beginDateTag":"&begin_date=",
+    "endDateTag":"&end_date=",
 
     "queryFormat":"dict",
     "booleanInQuery":1,
+    "dateFormat":"YMD",
 
     "contentPath":["response","docs"],
     "hitsPath":["response","meta","hits"],
+
     "messagePath":["message"],
     "statusPath":["status"],
-    "goodStatus":"OK"
+    "errorPath":["errors"],
+
+    "goodStatus":"OK",
+    "errorStatus":"ERROR",
+    "maxPages":150
   },
 
   "guardian":{
@@ -28,15 +36,23 @@
     "keyTag":"?api-key=",
     "queryTag":"&q=",
     "pageTag":"&page=",
+    "beginDateTag":"&from-date=",
+    "endDateTag":"&to-date=",
 
     "queryFormat":"list",
     "booleanInQuery":1,
+    "dateFormat":"Y-M-D",
 
     "contentPath":["response","results"],
     "hitsPath":["response","total"],
+
     "messagePath":["message"],
     "statusPath":["response","status"],
-    "goodStatus":"ok"
+    "errorPath":["response","message"],
+
+    "goodStatus":"ok",
+    "errorStatus":"error",
+    "maxPages":200
   },
 
   "wikipedia":{

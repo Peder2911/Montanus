@@ -14,7 +14,7 @@ from collections import deque
 
 import logging
 
-from tools import pageTools,argvTools,urlTools
+from tools import pageTools,argvTools,urlTools,fileTools,dateTimeTools
 
 #####################################
 
@@ -39,8 +39,7 @@ def getPage(url):
     try:
         page = requests.get(url).text
     except ConnectionError:
-        time.sleep(5)
-        page = requests.get(url).text
+        retryPage(url,1,5)
 
     page = json.loads(page)
     return(page)
@@ -55,11 +54,106 @@ def retryPage(url,tries,maxTries):
         except ConnectionError:
             retryPage(url,tries,maxTries)
 
+    else:
+        logging.critical('page not reachable?')
+        page = []
 
+    return(page)
 
 #####################################
 
-def scrapePages(targetSite,components,args,config):
+def querySniff(url,components):
+    responseChecker = pageTools.makeChecker(components)
+    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
+    print('Sniffing...')
+    response = getPage(url)
+
+    if responseChecker(response):
+        hits = hitsIndexer(response)
+    else:
+        logging.critical('Smells bad.')
+        hits = 0
+
+    if hits > 0:
+        pages = ((hits-1) // 10)+1
+    else:
+        pages = 0
+
+    return(hits,pages)
+
+def executeQuery(targetSite,arguments,beginDate=False,endDate=False):
+
+    components = fileTools.readJsonFile('config.json')[targetSite]
+    components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
+
+    contentIndexer = pageTools.makeIndexer(components['contentPath'])
+    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
+    responseChecker = pageTools.makeChecker(components)
+
+#    url = urlTools.parseUrl(arguments,components,0,beginDate,endDate)
+
+#    hits,pages = querySniff(url,components)
+
+    articles = subQuery(arguments,components,beginDate,endDate)
+
+    return(articles)
+
+def subQuery(arguments,components,beginDate,endDate):
+    contentIndexer = pageTools.makeIndexer(components['contentPath'])
+    responseChecker = pageTools.makeChecker(components)
+
+    url = urlTools.parseUrl(arguments,components,0,beginDate,endDate)
+
+    hits,pages = querySniff(url,components)
+    print("Number of hits: %i"%(hits))
+
+    if pages > components['maxPages']:
+        beginYear,_,_ = dateTimeTools.splitFormatted(beginDate,asInt=True)
+        endYear,_,_ = dateTimeTools.splitFormatted(endDate,asInt=True)
+
+        #WARNING if there is more than 2000 hits in a year, things get wierd.
+        durations = dateTimeTools.getDurations(beginYear,endYear)
+        print(durations)
+
+        beginDateA,endDateA = durations[0]
+        beginDateB,endDateB = durations[1]
+
+        print('Query split')
+
+        print('Requesting: 1st duration')
+        print(durations[0])
+        articles = subQuery(arguments,components,beginDateA,endDateA)
+
+        print('Requesting: 2nd duration')
+        print(durations[1])
+        articles += subQuery(arguments,components,beginDateB,endDateB)
+
+    elif pages != 0:
+        articles = []
+
+        pagesToGet = [x+1 for x in range(pages)]
+
+        for page in pagesToGet:
+            url = urlTools.parseUrl(arguments,components,page,beginDate,endDate)
+            response = getPage(url)
+
+            if responseChecker(response):
+                articles += contentIndexer(response)
+            else:
+                pass
+                #TODO error.
+    else:
+        print('C')
+        #TODO warning.
+        articles = []
+
+    return(articles)
+
+#####################################
+
+# Only actually needs targetSite and config, since these can give components
+# Only actually really needs target and args? (could read config in function)
+def scrapePages(targetSite,components,args,config,breaks = 0):
 
     contentIndexer = pageTools.makeIndexer(targetSite,'contentPath',config)
     hitsIndexer = pageTools.makeIndexer(targetSite,'hitsPath',config)
@@ -79,6 +173,10 @@ def scrapePages(targetSite,components,args,config):
         sys.exit(1)
 
     if pagesToGet > 200:
+        breaks = (hits // 2000) + 1
+        scrapePages(targetSite,components,args,config,breaks = breaks)
+
+
         # TODO time-range pageination
         logging.warning('Too many pages to get, getting 200 pages')
         pagesToGet = 200

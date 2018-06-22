@@ -25,8 +25,8 @@ def multiIndex(dictionary,indexList):
 
 # Multiindex decorator that returns a function adapted to target site.
 
-def makeIndexer(target,pathType,config):
-    path = config[target][pathType]
+def makeIndexer(path):
+#    path = config[target][pathType]
 
     def indexer(response):
 
@@ -43,31 +43,44 @@ def makeIndexer(target,pathType,config):
 # Sniffing function for determining if a response is healthy or not.
 # Also adapted to target site.
 
-def makeChecker(target,config):
+def makeChecker(components):
 
-    components = config[target]
+#    components = config[target]
 
     messagePath = components['messagePath']
     statusPath = components['statusPath']
+    errorPath = components['errorPath']
+
     goodStatus = components['goodStatus']
+    errorStatus = components['errorStatus']
 
 
     def responseChecker(response):
 
-        if multiIndex(response,messagePath) is not False:
+        if multiIndex(response,statusPath):
+            status = multiIndex(response,statusPath)
+
+            if status == goodStatus:
+                return(True)
+
+            elif status == errorStatus and multiIndex(response,errorPath):
+                error = multiIndex(response,errorPath)
+                logging.critical('Request returned error!')
+                logging.critical(error)
+                return(False)
+
+            else:
+                logging.warning('Bad status = %s'%(status))
+                return(False)
+
+        elif multiIndex(response,messagePath) is not False:
             message = multiIndex(response,messagePath)
 
             logging.warning(message)
             return(False)
 
-        elif multiIndex(response,statusPath):
-            status = multiIndex(response,statusPath)
-            if status == goodStatus:
-                return(True)
-            else:
-                logging.warning('Bad status = %s'%(status))
+
         else:
-            # TODO It CAN return "errors", but when?
             logging.critical('Wierd response! (no status or message)')
             logging.critical(response.keys())
             return(False)

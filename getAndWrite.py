@@ -19,7 +19,7 @@ import json
 
 import scraper
 import synonymFetcher
-from tools import pageTools,fileTools
+from tools import pageTools,fileTools,languageTools,dateTimeTools
 
 location = 'dyads/'
 filetype = '.csv'
@@ -38,14 +38,19 @@ if __name__ == '__main__':
 
     args = deque(sys.argv[1:])
     source = args.popleft()
-    args = args
+    arguments = args
 
-    response = scraper.directedScrape(source,args,config,apiKeys)
+    beginDate = '1981_01_01'
+    endDate = dateTimeTools.todayAsFormatted()
+
+    response = scraper.executeQuery(source,arguments,beginDate,endDate)
 
     if len(response) > 0:
         fileTools.writeResponse(response,args,source)
+        sys.exit(0)
     else:
         logging.warning('Writing no hits')
+        sys.exit(1)
 
 
 '''
