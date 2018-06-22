@@ -2,6 +2,10 @@ This is an interface to the NYT and Guardian APIs.
 The program gets data from these APIs, and writes it to csv-files in the "dyads"-
 folder. This data will eventually be analyzed in interesting ways!
 
+The scraper is written in python, and uses a couple of 
+external libraries (see requirements.txt). The 
+analysis-pipeline will be based on R.
+
 Will eventually form the input-part of an analysis 
 pipeline, so no article-data will be stored locally. This 
 tool is not mean to be used to gather and store 
