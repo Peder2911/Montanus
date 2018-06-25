@@ -2,18 +2,25 @@
   "nyt_base_url": "https://api.nytimes.com/svc/search/v2/articlesearch.json",
   "guardian_base_url":"https://content.guardianapis.com/search",
   "interval": 1.3,
-  "wiki_base_url": "https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
+  "wiki_base_url": "https://en.wikipedia.org/w/api.phpactionqueryformatjsonlistsearchsrsearch",
   "wiki_default_limit": "10",
   "retrylimit": 3,
   "defaultTarget":"nyt",
 
   "nyt":{
     "base_url":"https://api.nytimes.com/svc/search/v2/articlesearch.json",
-    "keyTag":"?api-key=",
-    "queryTag":"&fq=",
-    "pageTag":"&page=",
-    "beginDateTag":"&begin_date=",
-    "endDateTag":"&end_date=",
+    "keyTag":"api-key",
+    "queryTag":"fq",
+    "complexQueryTag":"fq",
+    "pageTag":"page",
+    "beginDateTag":"begin_date",
+    "endDateTag":"end_date",
+
+    "queryKeys":["glocations.contains",
+      "organizations",
+      "headline",
+      "body",
+      "persons"],
 
     "queryFormat":"dict",
     "booleanInQuery":1,
@@ -28,16 +35,16 @@
 
     "goodStatus":"OK",
     "errorStatus":"ERROR",
-    "maxPages":150
+    "maxPages":199
   },
 
   "guardian":{
     "base_url":"https://content.guardianapis.com/search",
-    "keyTag":"?api-key=",
-    "queryTag":"&q=",
-    "pageTag":"&page=",
-    "beginDateTag":"&from-date=",
-    "endDateTag":"&to-date=",
+    "keyTag":"api-key",
+    "queryTag":"q",
+    "pageTag":"page",
+    "beginDateTag":"from-date",
+    "endDateTag":"to-date",
 
     "queryFormat":"list",
     "booleanInQuery":1,
@@ -56,9 +63,9 @@
   },
 
   "wikipedia":{
-    "base_url":"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=",
+    "base_url":"https://en.wikipedia.org/w/api.phpactionqueryformatjsonlistsearchsrsearch",
     "keyTag":"",
-    "queryTag":"&srsearch=",
+    "queryTag":"srsearch",
 
     "queryFormat":"list",
     "booleanInQuery":0

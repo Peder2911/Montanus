@@ -23,42 +23,58 @@ with open('config.json') as file:
 
 #####################################
 
-def getPage(url):
+def getPage(url,parameters,json=True):
     time.sleep(config['interval'])
-    print('Getting %s'%(url))
     print('')
+    print('Getting %s'%(url))
+    for key,param in parameters.items():
+        print('%s=%s'%(key,param))
 
     try:
-        page = requests.get(url).text
+        page = requests.get(url,params = parameters)
     except ConnectionError:
+        logging.warning('ConnectionError, retrying')
         retryPage(url,1,5)
 
-    page = json.loads(page)
+    if json:
+        page = page.json()
+
+    else:
+        page = page.text
+
     return(page)
 
-def retryPage(url,tries,maxTries):
+def retryPage(url,parameters,tries,maxTries,json=True):
     if tries < maxTries:
         tries += 1
         time.sleep(1+tries)
 
         try:
-             page = requests.get(url).text
+             page = requests.get(url,params = parameters)
         except ConnectionError:
-            retryPage(url,tries,maxTries)
+            retryPage(url,parameters,tries,maxTries)
 
     else:
         logging.critical('page not reachable?')
         page = []
 
+    if json:
+        page = page.json()
+    else:
+        page = page.text
+
     return(page)
 
 #####################################
 
-def querySniff(url,components):
+def queryScope(url,parameters,components):
     responseChecker = pageTools.makeChecker(components)
     hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
-    print('Sniffing...')
-    response = getPage(url)
+
+    print('')
+    print('Scoping query...')
+
+    response = getPage(url,parameters)
 
     if responseChecker(response):
         hits = hitsIndexer(response)
@@ -71,9 +87,12 @@ def querySniff(url,components):
     else:
         pages = 0
 
+    print('')
+    print('Hits=%s (pages=%s)'%(hits,pages))
+
     return(hits,pages)
 
-def executeQuery(targetSite,arguments,beginDate=False,endDate=False):
+def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
 
     components = fileTools.readJsonFile('config.json')[targetSite]
     components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
@@ -82,43 +101,47 @@ def executeQuery(targetSite,arguments,beginDate=False,endDate=False):
     hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
     responseChecker = pageTools.makeChecker(components)
 
-#    url = urlTools.parseUrl(arguments,components,0,beginDate,endDate)
+    beginDate = urlTools.getDefaultDate('begin')
+    endDate = urlTools.getDefaultDate('end')
 
-#    hits,pages = querySniff(url,components)
+    dates = (beginDate,endDate)
 
-    articles = subQuery(arguments,components,beginDate,endDate)
+    articles = subQuery(arguments,components,dates,boolean)
 
     return(articles)
 
-def subQuery(arguments,components,beginDate,endDate):
+def subQuery(arguments,components,dates,boolean):
     contentIndexer = pageTools.makeIndexer(components['contentPath'])
     responseChecker = pageTools.makeChecker(components)
 
-    url = urlTools.parseUrl(arguments,components,0,beginDate,endDate)
+    url = components['base_url']
+    parameters = urlTools.gatherParameters(arguments,components,boolean=boolean,page=0,dates=dates)
 
-    hits,pages = querySniff(url,components)
+    hits,pages = queryScope(url,parameters,components)
     print("Number of hits: %i"%(hits))
 
     if pages > components['maxPages']:
+
+        print('')
+        print('Subdividing query...')
+
+        beginDate,endDate = dates
         beginYear,_,_ = dateTimeTools.splitFormatted(beginDate,asInt=True)
         endYear,_,_ = dateTimeTools.splitFormatted(endDate,asInt=True)
 
         #WARNING if there is more than 2000 hits in a year, things get wierd.
         durations = dateTimeTools.getDurations(beginYear,endYear)
-        print(durations)
 
-        beginDateA,endDateA = durations[0]
-        beginDateB,endDateB = durations[1]
+        datesA = beginDateA,endDateA = durations[0]
+        datesB = beginDateB,endDateB = durations[1]
 
-        print('Query split')
-
+        print('')
         print('Requesting: 1st duration')
-        print(durations[0])
-        articles = subQuery(arguments,components,beginDateA,endDateA)
+        articles = subQuery(arguments,components,datesA,boolean)
 
+        print('')
         print('Requesting: 2nd duration')
-        print(durations[1])
-        articles += subQuery(arguments,components,beginDateB,endDateB)
+        articles += subQuery(arguments,components,datesB,boolean)
 
     elif pages != 0:
         articles = []
@@ -126,8 +149,8 @@ def subQuery(arguments,components,beginDate,endDate):
         pagesToGet = [0]+[x+1 for x in range(pages)]
 
         for page in pagesToGet:
-            url = urlTools.parseUrl(arguments,components,page,beginDate,endDate)
-            response = getPage(url)
+            parameters = urlTools.gatherParameters(arguments,components,boolean=boolean,page=page,dates=dates)
+            response = getPage(url,parameters)
 
             if responseChecker(response):
                 articles += contentIndexer(response)

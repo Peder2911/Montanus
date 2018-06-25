@@ -18,7 +18,6 @@ def padNumber(number,zeroes):
 def getPercentiles(min,max,breaks = 2):
 
     out = [min]
-    print(max)
 
     years = range(min,max+1)
     basePercentile = 100 / breaks

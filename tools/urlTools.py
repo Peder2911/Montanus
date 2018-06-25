@@ -3,24 +3,15 @@
 #
 
 import logging
+import json
 import datetime
+import re
 
-#####################################
+class ConfigError(Exception):
+    pass
 
-def listToDict(list):
-
-    if len(list) == 0:
-        return(list)
-
-    if not len(list)%2:
-        i = iter(list)
-        out = dict(zip(i,i))
-    else:
-        logging.warning('Dictionary conversion of list dropping one item: %s'%(str(list[-1])))
-        list = list[:-1]
-        out = listToDict(list)
-
-    return(out)
+class FormatError(Exception):
+    pass
 
 def padNumber(number,zeroes):
     if number < 10 ** zeroes:
@@ -33,113 +24,158 @@ def padNumber(number,zeroes):
 
 def formatDate(date,dateFormat='Y-M-D'):
     # Accepts date as 'YYYY_MM_DD'!
-    year,month,day = date.split('_')
 
-    date = dateFormat.replace('Y','{yearFrm}')
-    date = date.replace('M','{monthFrm}')
-    date = date.replace('D','{dayFrm}')
+    if re.match('[0-9]{4}_[0-9]{2}_[0-9]{2}',date):
+        year,month,day = date.split('_')
 
-    date = date.format(yearFrm = year, monthFrm = month, dayFrm = day)
+        date = dateFormat.replace('Y','{yearFrm}')
+        date = date.replace('M','{monthFrm}')
+        date = date.replace('D','{dayFrm}')
+
+        date = date.format(yearFrm = year, monthFrm = month, dayFrm = day)
+    else:
+        logging.warning('Given date in wrong format %s'%(date))
+
     return(date)
 
-#####################################
+def argsToFq(arguments,components):
+    queryKeys = components['queryKeys']
+    fq = {}
+    currentArg = ''
 
-def adaptQuery(arguments,format='list',):
+    for argument in arguments:
+
+        if argument in queryKeys:
+            fq[argument] = []
+            currentArg = argument
+        elif currentArg in fq.keys():
+            fq[currentArg].append(argument)
+        else:
+            pass
+
+    return(fq)
+
+def dictToFqstring(dict,boolean):
+    str = ''
+
+    firstKey = True
+    for key in dict:
+
+        if firstKey:
+            firstKey = False
+        else:
+            str += " {bool} ".format(bool = boolean)
+
+        str += '{field}:('.format(field = key)
+
+        firstVal = True
+        for value in dict[key]:
+            if firstVal:
+                firstVal = False
+            else:
+                str += " "
+
+            str += '"{val}"'.format(val=value)
+
+        str += ")"
+
+    return(str)
+
+def listToFqstring(list):
+    str = ''
+    first = True
+    for entry in list:
+        if first:
+            str += '"'+ entry +'"'
+            first = False
+        else:
+            str += ' "%s"'%(entry)
+    return(str)
+
+
+def assembleQuery(argumentList,components,boolean):
+    # Takes a dictionary with list-values = {field:("value1" "value2")} and a boolean ('AND' / 'OR')
+    str = ''
+
+    if 'complexQueryTag' in components.keys():
+        format = 'dict'
+        queryName = components['complexQueryTag']
+    elif 'queryTag' in components.keys():
+        format = 'list'
+        queryName = components['queryTag']
+    else:
+        raise ConfigError('%s lacks query tag in config'%(components['siteName']))
 
     if format == 'dict':
-        arguments = listToDict(arguments)
-    elif format == 'list':
-        pass
+        fqDictionary = argsToFq(argumentList,components)
+        queryString = dictToFqstring(fqDictionary,boolean)
     else:
-        logging.warning('Bad query format "%s"'%(format))
-        logging.warning('Handling queries as list...')
+        queryString = listToFqstring(argumentList)
 
-    return(arguments)
-
-def parseQueries(components,arguments):
-    # Adapts to format required by the target site (from components)
-    # returns queries in correct format, separated by booleans.
-
-    logging.debug(components)
-
-    queryFormat = components['queryFormat']
-
-    queries = ''
-
-    arguments = adaptQuery(arguments,format = queryFormat)
-
-    #TODO add more booleans?
-    booleanOperator = ' AND '
-
-    if queryFormat == 'dict':
-        first = True
-        for key,value in arguments.items():
-            # add boolean if not first
-            if first:
-                first = False
-            else:
-                queries += booleanOperator
-
-            queries += '%s:"%s"'%(key,value)
-
-    elif queryFormat == 'list':
-        first = True
-        for value in arguments:
-            # add boolean if not first
-            if first:
-                first = False
-            else:
-                queries += booleanOperator
-
-            queries += '"' + value + '"'
-
-    else:
-        logging.critical('bad query format')
+    return(queryName,queryString)
 
 
-    return(queries)
+def getDefaultDate(type):
 
-#####################################
-
-def parseUrl(arguments,components,page=0,beginDate=False,endDate=False):
-
-    # datetime as YYYY_MM_DD
-
-    #####################################
-    # One Function to bring them all, and in the url bind them
-
-    if beginDate:
-        beginDate = str(beginDate)
-    else:
-        beginDate = '1980_01_01'
-
-    if endDate:
-        endDate = str(endDate)
-    else:
+    if type == 'begin':
+        date = '1981_01_01'
+    elif type == 'end':
         nowYear = str(datetime.datetime.now().year)
         nowMonth = padNumber(datetime.datetime.now().month,1)
         nowDay = padNumber(datetime.datetime.now().day,1)
 
-        endDate = '%s_%s_%s'%(nowYear,nowMonth,nowDay)
+        date = '%s_%s_%s'%(nowYear,nowMonth,nowDay)
+    else:
+        date = getDefaultDate('begin')
+    return(date)
 
-    dtForm = components['dateFormat']
-    beginDate = formatDate(beginDate,dtForm)
-    endDate = formatDate(endDate,dtForm)
+def handleDate(components,date,type):
 
-#        endDate = formatDate(nowYear,nowMonth,nowDay)
-
-    queries = parseQueries(components,arguments)
-
-    url = components['base_url']
-    url += components['keyTag'] + components['key']
-    url += components['queryTag'] + queries
-
-    if page > 0:
-        url += components['pageTag'] + str(page)
+    if date is False:
+        date = getDefaultDate(type)
     else:
         pass
 
-    url += components['beginDateTag'] + beginDate
-    url += components['endDateTag'] + endDate
+    format = components['dateFormat']
+    formatted = formatDate(date,dateFormat=format)
+    return(formatted)
 
-    return(url)
+def gatherParameters(arguments,components,boolean="AND",page=0,dates=(False,False)):
+
+    #####################################
+    # One Function to bring them all, and in the parameters dictionary bind them
+    # Remember that the date needs to be formatted like so : YYYY_MM_DD
+
+    #TODO this arguments stuff is pretty terrible, maybe dont need defaults at this lvl?
+
+    beginDate = handleDate(components,dates[0],'begin')
+    endDate = handleDate(components,dates[1],'end')
+
+    parameters = {}
+
+    queryName,queryString = assembleQuery(arguments,components,boolean)
+    parameters[queryName] = queryString
+
+    parameters[components['keyTag']] = components['key']
+
+    parameters[components['beginDateTag']] = beginDate
+    parameters[components['endDateTag']] = endDate
+
+    if page == 0:
+        pass
+    else:
+        parameters[components['pageTag']] = str(page)
+
+    return(parameters)
+
+if __name__ == '__main__':
+    with open('config.json') as file:
+        config = json.loads(file.read())
+
+    exComp = config['nyt']
+    exComp['key'] = 'AN_API_KEY'
+    exArgs = ['glocations.contains','colombia','organizations','Revolutionary Armed Forces of Colombia']
+
+    exComp2 = config['guardian']
+    exComp2['key'] = "64cb4929-0b1b-46e5-ae33-8baf895fd078"
+    exArgs2 = ['Colombia','FARC']
