@@ -1,6 +1,8 @@
 
 import csv
 import json
+import sys
+from io import StringIO
 
 def makeFilename(args,source,filetype='csv'):
 
@@ -27,31 +29,33 @@ def writeResponse(response,args,source):
 
     outFilename = location + filename + filetype
 
-    jsonToCsv(response,outFilename)
+    with open(outFilename,'w') as file:
+        writeJsonArticles(response,file)
 
 def getColNames(json):
     return(json[0].keys())
 
-def jsonToCsv(json,filename):
-    print('writing to %s'%(filename))
-    with open(filename,'w') as file:
-        writer = csv.writer(file)
-
-        colNames = getColNames(json)
-        writer.writerow(colNames)
 
 
-        for entry in json:
-            row = []
+def writeJsonArticles(articles,file):
 
-            for col in colNames:
+    writer = csv.writer(file)
 
-                if col in entry.keys():
-                    row.append(entry[col])
-                else:
-                    row.append('NA')
+    colNames = getColNames(articles)
+    writer.writerow(colNames)
 
-            writer.writerow(row)
+
+    for entry in articles:
+        row = []
+
+        for col in colNames:
+
+            if col in entry.keys():
+                row.append(entry[col])
+            else:
+                row.append('NA')
+
+        writer.writerow(row)
 
 def readJsonFile(file):
     with open(file) as targetFile:

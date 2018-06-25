@@ -36,11 +36,16 @@ def getPage(url,parameters,json=True):
         logging.warning('ConnectionError, retrying')
         retryPage(url,1,5)
 
+    url = page.url
+
     if json:
         page = page.json()
 
     else:
         page = page.text
+
+    print('')
+    print(url)
 
     return(page)
 
@@ -83,7 +88,7 @@ def queryScope(url,parameters,components):
         hits = 0
 
     if hits > 0:
-        pages = ((hits-1) // 10)+1
+        pages = ((hits-1) // 10)
     else:
         pages = 0
 
@@ -94,6 +99,7 @@ def queryScope(url,parameters,components):
 
 def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
 
+    #TODO should be passed as arguments?
     components = fileTools.readJsonFile('config.json')[targetSite]
     components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
 

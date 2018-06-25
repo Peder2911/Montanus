@@ -37,7 +37,7 @@ with open('locations.csv',encoding = 'utf-8') as file:
 def makeDyadCall(source,country):
     call = ['./getAndWrite.py']
     call += ['nyt']
-    call += ['glocations',country]
+    call += ['glocations.contains',country]
 
     return(call)
 
