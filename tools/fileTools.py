@@ -38,7 +38,8 @@ def getColNames(json):
 
 
 def writeJsonArticles(articles,file):
-
+    #TODO export the json properly!
+    #(do JSON dumps)...
     writer = csv.writer(file)
 
     colNames = getColNames(articles)

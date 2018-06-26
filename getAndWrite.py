@@ -38,12 +38,13 @@ if __name__ == '__main__':
 
     args = deque(sys.argv[1:])
     source = args.popleft()
+    boolean = " %s "%(args.popleft())
     arguments = args
 
     beginDate = '1981_01_01'
     endDate = dateTimeTools.todayAsFormatted()
 
-    response = scraper.executeQuery(source,arguments,(beginDate,endDate))
+    response = scraper.executeQuery(source,arguments,dates=(beginDate,endDate),boolean=boolean)
 
     if len(response) > 0:
         fileTools.writeResponse(response,args,source)
