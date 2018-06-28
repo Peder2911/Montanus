@@ -1,4 +1,4 @@
-# Not tested with current implementation
+# Not currently in use.
 
 import requests
 import json

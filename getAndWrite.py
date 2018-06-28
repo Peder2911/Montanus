@@ -49,7 +49,7 @@ if __name__ == '__main__':
     response = scraper.executeQuery(source,arguments,dates=(beginDate,endDate),boolean=boolean)
 
     if len(response) > 0:
-        fileTools.writeResponse(response,args,source)
+        fileTools.writeOutCsv(response,args,source)
         sys.exit(0)
     else:
         logging.warning('Writing no hits')

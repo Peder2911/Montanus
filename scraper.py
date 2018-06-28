@@ -96,6 +96,7 @@ def subQuery(components,dates,page=0):
     elif pages != 0:
         articles = []
 
+        #TODO Why get zero-eth page?
         pagesToGet = [0]+[x+1 for x in range(pages)]
 
         for page in pagesToGet:
