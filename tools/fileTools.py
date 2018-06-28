@@ -52,6 +52,7 @@ def writeJsonArticles(articles,file):
         for col in colNames:
 
             if col in entry.keys():
+                #JSON needs to be handled here.
                 row.append(entry[col])
             else:
                 row.append('NA')

@@ -14,12 +14,132 @@ from collections import deque
 
 import logging
 
-from tools import pageTools,argvTools,urlTools,fileTools,dateTimeTools
+from tools import pageTools,urlTools,fileTools,dateTimeTools
 
 #####################################
 
 with open('config.json') as file:
     config = json.loads(file.read())
+
+#####################################
+
+def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
+
+    #WARNING this function is impure...
+    components = fileTools.readJsonFile('config.json')[targetSite]
+    components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
+    components['arguments'] = arguments
+    components['dates'] = dates
+    components['boolean'] = boolean
+
+    #######
+    contentIndexer = pageTools.makeIndexer(components['contentPath'])
+    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
+    responseChecker = pageTools.makeChecker(components)
+    #######
+
+    #######
+    if all(dates) is False:
+        beginDate = dateTimeTools.getDefaultDate('begin')
+        endDate = dateTimeTools.getDefaultDate('end')
+        dates = (beginDate,endDate)
+
+
+    if all(dateTimeTools.checkBaseFormat(date) for date in dates):
+        pass
+    else:
+        print(dates)
+        articles = executeQuery(targetSite,arguments,dates=(False,False),boolean=boolean)
+
+#    dates = [*(dateTimeTools.baseformatToDatetime(date) for date in dates)]
+    articles = subQuery(components,dates)
+
+    return(articles)
+
+#####################################
+
+def subQuery(components,dates,page=0):
+    #TODO recurring code
+    #Decorate definition?
+    contentIndexer = pageTools.makeIndexer(components['contentPath'])
+    responseChecker = pageTools.makeChecker(components)
+
+    url = components['base_url']
+    parameters = adaptedParameters(components,page,dates)
+
+    # Scopes with initial dates
+    hits,pages = queryScope(url,parameters,components)
+    print("Number of hits: %i"%(hits))
+
+    if pages > components['maxPages']:
+
+        print('')
+        print('Subdividing query...')
+
+        beginDate,endDate = dates
+        #WARNING if there is more than 2000 hits in a year, things get wierd.
+
+        durations = dateTimeTools.dateDurations(beginDate,endDate)
+
+        datesA = beginDateA,endDateA = durations[0]
+        datesB = beginDateB,endDateB = durations[1]
+
+        print('')
+        print('Requesting: 1st duration')
+        articles = subQuery(components,datesA)
+
+        print('')
+        print('Requesting: 2nd duration')
+        articles += subQuery(components,datesB)
+
+
+    elif pages != 0:
+        articles = []
+
+        pagesToGet = [0]+[x+1 for x in range(pages)]
+
+        for page in pagesToGet:
+            parameters['page'] = page
+            response = getPage(url,parameters)
+
+            if responseChecker(response):
+                articles += contentIndexer(response)
+            else:
+                pass
+                #TODO error bad response
+
+    else:
+        #TODO warning no articles
+        articles = []
+
+    return(articles)
+
+#####################################
+
+def queryScope(url,parameters,components):
+    responseChecker = pageTools.makeChecker(components)
+    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
+
+    print('')
+    print('Scoping query...')
+
+    response = getPage(url,parameters)
+
+    if responseChecker(response):
+        hits = hitsIndexer(response)
+    else:
+        logging.critical('Smells bad.')
+        hits = 0
+
+    if hits > 0:
+        pages = ((hits-1) // 10)
+    else:
+        pages = 0
+
+    print('')
+    print('Hits=%s (pages=%s)'%(hits,pages))
+
+    return(hits,pages)
 
 #####################################
 
@@ -72,101 +192,20 @@ def retryPage(url,parameters,tries,maxTries,json=True):
 
 #####################################
 
-def queryScope(url,parameters,components):
-    responseChecker = pageTools.makeChecker(components)
-    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
+def adaptedParameters(components,page,dates):
+    parameters = {}
 
-    print('')
-    print('Scoping query...')
+    beginDate,endDate = (urlTools.adaptedDate(date,components) for date in dates)
+    queryName,queryString = urlTools.adaptedQuery(components)
 
-    response = getPage(url,parameters)
+    parameters[queryName] = queryString
+    parameters[components['beginDateTag']] = beginDate
+    parameters[components['endDateTag']] = endDate
+    parameters[components['keyTag']] = components['key']
 
-    if responseChecker(response):
-        hits = hitsIndexer(response)
-    else:
-        logging.critical('Smells bad.')
-        hits = 0
+    if page != 0:
+        parameters[components['pageTag']] = str(page)
 
-    if hits > 0:
-        pages = ((hits-1) // 10)
-    else:
-        pages = 0
-
-    print('')
-    print('Hits=%s (pages=%s)'%(hits,pages))
-
-    return(hits,pages)
-
-def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
-
-    #TODO should be passed as arguments?
-    components = fileTools.readJsonFile('config.json')[targetSite]
-    components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
-
-    contentIndexer = pageTools.makeIndexer(components['contentPath'])
-    hitsIndexer = pageTools.makeIndexer(components['hitsPath'])
-    responseChecker = pageTools.makeChecker(components)
-
-    beginDate = urlTools.getDefaultDate('begin')
-    endDate = urlTools.getDefaultDate('end')
-
-    dates = (beginDate,endDate)
-
-    articles = subQuery(arguments,components,dates,boolean)
-
-    return(articles)
-
-def subQuery(arguments,components,dates,boolean):
-    contentIndexer = pageTools.makeIndexer(components['contentPath'])
-    responseChecker = pageTools.makeChecker(components)
-
-    url = components['base_url']
-    parameters = urlTools.gatherParameters(arguments,components,boolean=boolean,page=0,dates=dates)
-
-    hits,pages = queryScope(url,parameters,components)
-    print("Number of hits: %i"%(hits))
-
-    if pages > components['maxPages']:
-
-        print('')
-        print('Subdividing query...')
-
-        beginDate,endDate = dates
-        beginYear,_,_ = dateTimeTools.splitFormatted(beginDate,asInt=True)
-        endYear,_,_ = dateTimeTools.splitFormatted(endDate,asInt=True)
-
-        #WARNING if there is more than 2000 hits in a year, things get wierd.
-        durations = dateTimeTools.getDurations(beginYear,endYear)
-
-        datesA = beginDateA,endDateA = durations[0]
-        datesB = beginDateB,endDateB = durations[1]
-
-        print('')
-        print('Requesting: 1st duration')
-        articles = subQuery(arguments,components,datesA,boolean)
-
-        print('')
-        print('Requesting: 2nd duration')
-        articles += subQuery(arguments,components,datesB,boolean)
-
-    elif pages != 0:
-        articles = []
-
-        pagesToGet = [0]+[x+1 for x in range(pages)]
-
-        for page in pagesToGet:
-            parameters = urlTools.gatherParameters(arguments,components,boolean=boolean,page=page,dates=dates)
-            response = getPage(url,parameters)
-
-            if responseChecker(response):
-                articles += contentIndexer(response)
-            else:
-                pass
-                #TODO error.
-    else:
-        #TODO warning.
-        articles = []
-
-    return(articles)
+    return(parameters)
 
 #####################################

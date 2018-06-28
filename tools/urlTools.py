@@ -13,16 +13,9 @@ class ConfigError(Exception):
 class FormatError(Exception):
     pass
 
-def padNumber(number,zeroes):
-    if number < 10 ** zeroes:
-        numberString = str(number)
-        padding = "0" * (zeroes-(len(numberString)-1))
-        number = padding + numberString
-    else:
-        number = str(number)
-    return(number)
+#####################################
 
-def formatDate(date,dateFormat='Y-M-D'):
+def adaptDate(date,dateFormat='Y-M-D'):
     # Accepts date as 'YYYY_MM_DD'!
 
     if re.match('[0-9]{4}_[0-9]{2}_[0-9]{2}',date):
@@ -34,12 +27,16 @@ def formatDate(date,dateFormat='Y-M-D'):
 
         date = date.format(yearFrm = year, monthFrm = month, dayFrm = day)
     else:
-        logging.warning('Given date in wrong format %s'%(date))
+        logging.warning('Not base format : %s'%(date))
 
     return(date)
 
-def argsToFq(arguments,components):
+#####################################
+
+def argsToFq(components):
     queryKeys = components['queryKeys']
+    arguments = components['arguments']
+
     fq = {}
     currentArg = ''
 
@@ -53,7 +50,9 @@ def argsToFq(arguments,components):
         else:
             pass
 
-    return(fq)
+    string=dictToFqstring(fq,components['boolean'])
+
+    return(string)
 
 def dictToFqstring(dict,boolean):
     str = ''
@@ -92,10 +91,12 @@ def listToFqstring(list):
             str += ' "%s"'%(entry)
     return(str)
 
+#####################################
 
-def assembleQuery(argumentList,components,boolean):
+def adaptedQuery(components):
     # Takes a dictionary with list-values = {field:("value1" "value2")} and a boolean ('AND' / 'OR')
     str = ''
+    argumentList = components['arguments']
 
     if 'complexQueryTag' in components.keys():
         format = 'dict'
@@ -107,75 +108,13 @@ def assembleQuery(argumentList,components,boolean):
         raise ConfigError('%s lacks query tag in config'%(components['siteName']))
 
     if format == 'dict':
-        fqDictionary = argsToFq(argumentList,components)
-        queryString = dictToFqstring(fqDictionary,boolean)
+        queryString = argsToFq(components)
     else:
-        queryString = listToFqstring(argumentList)
+        queryString = listToFqstring(components['arguments'])
 
     return(queryName,queryString)
 
-
-def getDefaultDate(type):
-
-    if type == 'begin':
-        date = '1981_01_01'
-    elif type == 'end':
-        nowYear = str(datetime.datetime.now().year)
-        nowMonth = padNumber(datetime.datetime.now().month,1)
-        nowDay = padNumber(datetime.datetime.now().day,1)
-
-        date = '%s_%s_%s'%(nowYear,nowMonth,nowDay)
-    else:
-        date = getDefaultDate('begin')
-    return(date)
-
-def handleDate(components,date,type):
-
-    if date is False:
-        date = getDefaultDate(type)
-    else:
-        pass
-
+def adaptedDate(date,components):
     format = components['dateFormat']
-    formatted = formatDate(date,dateFormat=format)
+    formatted = adaptDate(date,dateFormat=format)
     return(formatted)
-
-def gatherParameters(arguments,components,boolean="AND",page=0,dates=(False,False)):
-
-    #####################################
-    # One Function to bring them all, and in the parameters dictionary bind them
-    # Remember that the date needs to be formatted like so : YYYY_MM_DD
-
-    #TODO this arguments stuff is pretty terrible, maybe dont need defaults at this lvl?
-
-    beginDate = handleDate(components,dates[0],'begin')
-    endDate = handleDate(components,dates[1],'end')
-
-    parameters = {}
-
-    queryName,queryString = assembleQuery(arguments,components,boolean)
-    parameters[queryName] = queryString
-
-    parameters[components['keyTag']] = components['key']
-
-    parameters[components['beginDateTag']] = beginDate
-    parameters[components['endDateTag']] = endDate
-
-    if page == 0:
-        pass
-    else:
-        parameters[components['pageTag']] = str(page)
-
-    return(parameters)
-
-if __name__ == '__main__':
-    with open('config.json') as file:
-        config = json.loads(file.read())
-
-    exComp = config['nyt']
-    exComp['key'] = 'AN_API_KEY'
-    exArgs = ['glocations.contains','colombia','organizations','Revolutionary Armed Forces of Colombia']
-
-    exComp2 = config['guardian']
-    exComp2['key'] = "64cb4929-0b1b-46e5-ae33-8baf895fd078"
-    exArgs2 = ['Colombia','FARC']

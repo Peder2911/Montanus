@@ -1,7 +1,9 @@
 #!../bin/python
 
 # Utility script
-# Called like this: script.py source arguments*
+
+# Called like this: script.py source boolean(AND/OR) arguments*
+
 # The source needs to be a valid source (see config.json)
 # Arguments will either be formatted as dictionary-like arguments (key-value pairs)
 # or a list of arguments. This depends on the source.
