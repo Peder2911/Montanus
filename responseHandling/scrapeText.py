@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from readTestData import gHtml
 import requests
 import time
 import logging
@@ -14,9 +13,9 @@ class ResponseError(Exception):
 
 # Both refer to the same article
 
-def extractSentences(html,bodyTag="articleBody"):
+def extractSentences(html,tag="articleBody"):
     bSp = BeautifulSoup(html,"html.parser")
-    body = bSp.find(itemprop=bodyTag)
+    body = bSp.find(itemprop=tag)
 
     if body is None:
         raise ResponseError('Bad tag / no sentences')
@@ -25,7 +24,7 @@ def extractSentences(html,bodyTag="articleBody"):
         sentences = [sent for sent in sentences if sent != '' and len(sent.split()) > 4]
     return(sentences)
 
-def getSentences(url):
+def getSentences(url,tag="articleBody"):
     time.sleep(0.5)
     print('Retrieving sentences from %s'%(url))
     try:
@@ -37,11 +36,12 @@ def getSentences(url):
         rHtml = r.text
 
         try:
-            sentences = extractSentences(rHtml)
+            sentences = extractSentences(rHtml,tag=tag)
         except ResponseError:
             print('No sentences @ %s'%(url))
             sentences = []
 
+    sentences = '\n'.join(sentences)
     return(sentences)
 
 url = 'https://www.theguardian.com/world/1992/jul/24/colombia.fromthearchive'

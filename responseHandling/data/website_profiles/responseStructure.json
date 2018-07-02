@@ -1,0 +1,23 @@
+{
+  "nyt":
+  {
+    "request?":false,
+
+    "date":["pub_date"],
+    "headline":["headline","main"],
+    "body":["snippet"],
+    "source":["web_url"]
+  },
+  "guardian":
+  {
+    "request?":true,
+    "scrapeTag":"articleBody",
+
+    "date":["webPublicationDate"],
+    "headline":["webTitle"],
+    "body":["body"],
+    "source":["webUrl"]
+
+  }
+
+}
