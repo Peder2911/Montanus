@@ -1,9 +1,10 @@
 import json
 import os
 import logging
-import scrapeText
 import re
 import pandas as pd
+
+from . import scrapeText
 
 from collections import deque
 
