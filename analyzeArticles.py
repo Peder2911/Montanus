@@ -23,8 +23,8 @@ with open('keys.json') as keyFile:
 
 #####################################
 
-testTarget = 'nyt'
-testArguments = ['glocations','Mozambique','organizations','Renamo']
+testTarget = 'guardian'
+testArguments = ['hedmark']
 
 #####################################
 try:
@@ -47,3 +47,5 @@ jsonString = json.dumps(docs)
 toR = jsonString + '\n'
 
 process = subprocess.run(['./analysis/bayesPredict.r'],input=toR.encode())
+
+#TODO add support for arguments

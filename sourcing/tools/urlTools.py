@@ -80,15 +80,16 @@ def dictToFqstring(dict,boolean):
 
     return(str)
 
-def listToFqstring(list):
+def listToFqstring(components):
+    args = components['arguments']
     str = ''
     first = True
-    for entry in list:
+    for entry in args:
         if first:
-            str += '"'+ entry +'"'
+            str += entry
             first = False
         else:
-            str += ' "%s"'%(entry)
+            str += ' {bool} {entr}'.format(bool=components['boolean'],entr=entry)
     return(str)
 
 #####################################
@@ -110,7 +111,7 @@ def adaptedQuery(components):
     if format == 'dict':
         queryString = argsToFq(components)
     else:
-        queryString = listToFqstring(components['arguments'])
+        queryString = listToFqstring(components)
 
     return(queryName,queryString)
 
