@@ -6,9 +6,8 @@ import sys
 import json
 import csv
 
-import webQuery
-#from tools import fileTools
-from responseHandling import standardization as stdization
+from sourcing import webQuery
+from sourcing.responseHandling import standardization as stdization
 
 from io import StringIO
 
@@ -24,8 +23,8 @@ with open('keys.json') as keyFile:
 
 #####################################
 
-testTarget = 'guardian'
-testArguments = ['hedmark']
+testTarget = 'nyt'
+testArguments = ['glocations','Mozambique','organizations','Renamo']
 
 #####################################
 try:

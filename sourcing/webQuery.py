@@ -14,7 +14,7 @@ from collections import deque
 
 import logging
 
-from tools import pageTools,urlTools,fileTools,dateTimeTools
+from .tools import pageTools,urlTools,fileTools,dateTimeTools
 
 #####################################
 
