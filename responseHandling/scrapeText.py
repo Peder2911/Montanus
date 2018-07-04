@@ -26,7 +26,7 @@ def extractSentences(html,tag="articleBody"):
 
 def getSentences(url,tag="articleBody"):
     time.sleep(0.5)
-    print('Retrieving sentences from %s'%(url))
+    print('Retrieving sentences from %s (with %s)'%(url,tag))
     try:
         r = requests.get(url)
     except ConnectionError:
@@ -38,7 +38,6 @@ def getSentences(url,tag="articleBody"):
         try:
             sentences = extractSentences(rHtml,tag=tag)
         except ResponseError:
-            print('No sentences @ %s'%(url))
             sentences = []
 
     sentences = '\n'.join(sentences)

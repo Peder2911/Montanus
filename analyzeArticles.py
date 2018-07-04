@@ -4,8 +4,9 @@ import subprocess
 import sys
 
 import json
+import csv
 
-import scraper
+import webQuery
 #from tools import fileTools
 from responseHandling import standardization as stdization
 
@@ -23,18 +24,24 @@ with open('keys.json') as keyFile:
 
 #####################################
 
-testTarget = 'nyt'
-testArguments = ['glocations.contains','mozambique','organizations','renamo']
+testTarget = 'guardian'
+testArguments = ['hedmark']
 
 #####################################
+try:
+    with open('testTemp/.json') as file:
+        docs = json.load(file)
+except FileNotFoundError:
+    pages = webQuery.executeQuery(testTarget,testArguments)
 
-#pages = scraper.executeQuery(testTarget,testArguments)
+    docs = pages
+    docs = [stdization.generalizeFormat(doc,source=testTarget) for doc in docs]
 
-with open('testCases/nyt/ok.json') as file:
-    toWrite = json.loads(file.read())
-
-docs = toWrite['response']['docs']
-docs = [stdization.generalizeFormat(doc) for doc in docs]
+    try:
+        with open('testTemp/.json','w') as file:
+            json.dump(docs,file)
+    except FileNotFoundError:
+        logging.debug('no tempfile written')
 
 jsonString = json.dumps(docs)
 

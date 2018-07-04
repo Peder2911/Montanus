@@ -3,13 +3,17 @@
 # libs --------------------------------------------------------------------
 
 
-library(jsonlite)
-library(stringr)
-library(magrittr)
-library(dplyr)
-library(tm)
-library(e1071)
+suppressMessages(library(jsonlite))
+suppressMessages(library(stringr))
+suppressMessages(library(magrittr))
+suppressMessages(library(dplyr))
+suppressMessages(library(tm))
+suppressMessages(library(e1071))
 
+writeLines('\nRunning R!')
+
+# Model name : m
+# Terms name : tf
 
 # functions ---------------------------------------------------------------
 
@@ -63,6 +67,10 @@ applyToColumns <- function(df,func){
 }
 
 analyzeArticle <- function(article){
+  writeLines('\nAnalyzing article...')
+  writeLines(paste('\n',article['headline'],sep=''))
+  writeLines(paste('\n',article['source'],sep=''))
+
   sentences <- str_split(article['body'],"\\.")%>%
     unlist()
   sentences <- sentences[str_length(sentences) > 0]
@@ -101,6 +109,9 @@ analyzeArticle <- function(article){
 }
 
 runAnalysis <- function(articles){
+  articles <- articles%>%
+    filter(!body=='')
+
   data <- apply(articles,1,analyzeArticle)%>%
     bind_rows()
   data
@@ -114,8 +125,10 @@ path <- substr(commandArgs()[4],10,nchar(commandArgs()[4]))%>%
 path <- paste(path[-length(path)],collapse='/')
 
 modPath <- paste(path,'models/bayes1.rds',sep='/')
-print(modPath)
 load(modPath)
+
+writeLines('\nModel loaded;')
+writeLines(attributes(m)$class)
 
 articles <- readLines('stdin')%>%
   fromJSON()

@@ -11,7 +11,7 @@
   "guardian":
   {
     "request?":true,
-    "scrapeTag":"articleBody",
+    "scrapeTags":["description","reviewBody","articleBody"],
 
     "date":["webPublicationDate"],
     "headline":["webTitle"],
