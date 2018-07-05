@@ -23,8 +23,8 @@ with open('keys.json') as keyFile:
 
 #####################################
 
-testTarget = 'guardian'
-testArguments = ['hedmark']
+testTarget = 'nyt'
+testArguments = ['glocations.contains','colombia','organizations','revolutionary armed forces of colombia']
 
 #####################################
 try:

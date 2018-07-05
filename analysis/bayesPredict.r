@@ -9,6 +9,7 @@ suppressMessages(library(magrittr))
 suppressMessages(library(dplyr))
 suppressMessages(library(tm))
 suppressMessages(library(e1071))
+suppressMessages(library(beepr))
 
 writeLines('\nRunning R!')
 
@@ -66,7 +67,7 @@ applyToColumns <- function(df,func){
   df
 }
 
-analyzeArticle <- function(article){
+analyzeArticle <- function(article,outputType){
   writeLines('\nAnalyzing article...')
   writeLines(paste('\n',article['headline'],sep=''))
   writeLines(paste('\n',article['source'],sep=''))
@@ -95,24 +96,35 @@ analyzeArticle <- function(article){
     x <- factor(x,levels=c('no','yes'))
   })
 
-  out <- list(
-    source = article['source'],
-    date = article['date'],
-    headline = article['headline'],
-    sentCount = length(sentences),
-    maxProb = max(pred[,2]),
-    meanProb = mean(pred[,2]),
-    posClass = sum(catPred),
-    pstPosClass = sum(catPred) / length(sentences)
-  )
+
+  meta <- article[c('date','headline','source')]
+
+  if(outputType == 'recommendations'){
+    out <- list(
+      source = article['source'],
+      date = article['date'],
+      headline = article['headline'],
+      sentCount = length(sentences),
+      maxProb = max(pred[,2]),
+      meanProb = mean(pred[,2]),
+      posClass = sum(catPred),
+      pstPosClass = sum(catPred) / length(sentences)
+
+  )} else if(outputType == 'retrain'){
+    out <- as.list(data.frame(sent=sentences,
+      pred=catPred,
+      conf = round(pred[,2],digits=2),
+      stringsAsFactors=FALSE))
+  }
+
   out
 }
 
-runAnalysis <- function(articles){
+runAnalysis <- function(articles,outputType='recommendations'){
   articles <- articles%>%
     filter(!body=='')
 
-  data <- apply(articles,1,analyzeArticle)%>%
+  data <- apply(articles,1,analyzeArticle,outputType=outputType)%>%
     bind_rows()
   data
 }
@@ -124,7 +136,7 @@ path <- substr(commandArgs()[4],10,nchar(commandArgs()[4]))%>%
   unlist()
 path <- paste(path[-length(path)],collapse='/')
 
-modPath <- paste(path,'models/bayes1.rds',sep='/')
+modPath <- paste(path,'models/clever_Katelyn_Gray.rdat',sep='/')
 load(modPath)
 
 writeLines('\nModel loaded;')
@@ -133,7 +145,7 @@ writeLines(attributes(m)$class)
 articles <- readLines('stdin')%>%
   fromJSON()
 
-out <- runAnalysis(articles)
+out <- runAnalysis(articles,outputType='recommendations')
 
 # Out ----------------------------------------------------------------
 
@@ -141,3 +153,4 @@ now <- format(Sys.time(),'_%Y_%m_%d_%X')
 filePath <- paste('classifiedData/articles',now,'.csv',sep='')
 
 write.csv(out,file=paste(path,filePath,sep='/'))
+beep(1)
