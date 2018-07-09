@@ -24,7 +24,7 @@ with open('keys.json') as keyFile:
 #####################################
 
 testTarget = 'nyt'
-testArguments = ['glocations.contains','colombia','organizations','revolutionary armed forces of colombia']
+testArguments = ['glocations.contains','mexico','body','rebels']
 
 #####################################
 try:

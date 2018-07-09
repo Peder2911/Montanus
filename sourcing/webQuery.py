@@ -14,11 +14,11 @@ from collections import deque
 
 import logging
 
-from .tools import pageTools,urlTools,fileTools,dateTimeTools
+from .tools import pageTools,urlTools,fileTools,dateTimeTools,moduleTools
 
 #####################################
 
-with open('config.json') as file:
+with open(moduleTools.relPath('../config.json',__file__)) as file:
     config = json.loads(file.read())
 
 #####################################
