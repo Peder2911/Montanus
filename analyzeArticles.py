@@ -13,16 +13,6 @@ from io import StringIO
 
 #####################################
 
-with open('config.json') as configFile:
-    config = configFile.read()
-    config = json.loads(config)
-
-with open('keys.json') as keyFile:
-    keys = keyFile.read()
-    keys = json.loads(keys)
-
-#####################################
-
 testTarget = 'nyt'
 testArguments = ['glocations.contains','mexico','body','rebels']
 

@@ -15,6 +15,29 @@ class FormatError(Exception):
 
 #####################################
 
+def adaptedQuery(components):
+    # Decision tree to determine which one to choose
+    str = ''
+    argumentList = components['arguments']
+
+    if 'complexQueryTag' in components.keys():
+        format = 'dict'
+        queryName = components['complexQueryTag']
+    elif 'queryTag' in components.keys():
+        format = 'list'
+        queryName = components['queryTag']
+    else:
+        raise ConfigError('%s lacks query tag in config'%(components['siteName']))
+
+    if format == 'dict':
+        queryString = argsToFq(components)
+    else:
+        queryString = listToFqstring(components)
+
+    return(queryName,queryString)
+
+#####################################
+
 def adaptDate(date,dateFormat='Y-M-D'):
     # Accepts date as 'YYYY_MM_DD'!
 
@@ -94,26 +117,6 @@ def listToFqstring(components):
 
 #####################################
 
-def adaptedQuery(components):
-    # Takes a dictionary with list-values = {field:("value1" "value2")} and a boolean ('AND' / 'OR')
-    str = ''
-    argumentList = components['arguments']
-
-    if 'complexQueryTag' in components.keys():
-        format = 'dict'
-        queryName = components['complexQueryTag']
-    elif 'queryTag' in components.keys():
-        format = 'list'
-        queryName = components['queryTag']
-    else:
-        raise ConfigError('%s lacks query tag in config'%(components['siteName']))
-
-    if format == 'dict':
-        queryString = argsToFq(components)
-    else:
-        queryString = listToFqstring(components)
-
-    return(queryName,queryString)
 
 def adaptedDate(date,components):
     format = components['dateFormat']
