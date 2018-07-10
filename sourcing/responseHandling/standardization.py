@@ -4,7 +4,7 @@ import logging
 import re
 import pandas as pd
 
-from . import scrapeText
+from . import getSentences
 
 from collections import deque
 
@@ -14,6 +14,16 @@ This code changes data scraped from multiple sources into a standardized format
 that is suitable for analysis.
 
 The data is read and written as JSON.
+
+The standard format is like this:
+
+keys = ('date','headline','body','source')
+
+date is the publication date
+headline is the headline, not processed
+body is a list of sentences
+source is a url.
+
 '''
 #####################################
 
@@ -27,19 +37,22 @@ def recursiveIndex(dict,keys):
 #####################################
 
 def tryTagsForText(url,tags):
-    text = ''
+    body = ['NA']
 
-    while text == '' and tags != []:
+    while body == ['NA'] and tags != []:
         currTag = tags.pop()
-        text = scrapeText.getSentences(url,tag=currTag)
+        body = getSentences.getSentences(url,tag=currTag)
 
-    if text == '':
-        text = 'none'
-    return(text)
+    if body == ['NA']:
+        pass #TODO replace default?
 
-def generalizeFormat(jsonArticle,source = 'nyt'):
+    return(body)
 
-    path = os.path.join(os.path.dirname(__file__),'data/website_profiles/responseStructure.json')
+#####################################
+
+def generalizeFormat(jsonArticle,source):
+
+    path = os.path.join(os.path.dirname(__file__),'data/profiles.json')
     with open(path) as file:
         profile = json.load(file)[source]
 
@@ -51,18 +64,19 @@ def generalizeFormat(jsonArticle,source = 'nyt'):
         try:
             url = recursiveIndex(jsonArticle,profile['source'])
         except KeyError:
-            logging.warning('Not able to get text, no URL in article file')
-            text = []
+            logging.warning('Not able to get body, no URL in article file')
+            body = ['NA']
 
         tags = profile['scrapeTags']
-        text = tryTagsForText(url,tags)
-        jsonArticle['body'] = text
+        body = tryTagsForText(url,tags)
+
+        jsonArticle['body'] = body
 
     for key in keys:
         try:
             out[key] = recursiveIndex(jsonArticle,profile[key])
         except KeyError:
             logging.warning('%s not in article'%(key))
-            out[key] = ''
+            out[key] = 'NA'
 
     return(out)

@@ -21,13 +21,18 @@ from .tools import pageTools,urlTools,fileTools,dateTimeTools,moduleTools
 with open(moduleTools.relPath('configFiles/sourceProfiles.json',__file__)) as file:
     config = json.load(file)
 
+with open(moduleTools.relPath('configFiles/keys.json',__file__)) as file:
+    keys = json.load(file)
+
 #####################################
 
 def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
 
     #WARNING this function is impure...
+
     components = config[targetSite]
-    components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
+    components['key'] = keys[targetSite]
+
     components['arguments'] = arguments
     components['dates'] = dates
     components['boolean'] = boolean
