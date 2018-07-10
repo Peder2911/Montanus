@@ -8,4 +8,4 @@ def relPath(filePath,fileVar):
     relPath = os.path.join(selfPath,filePath)
     return(relPath)
 
-#easter
+#easter egg
