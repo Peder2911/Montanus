@@ -28,7 +28,6 @@ def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
     #WARNING this function is impure...
     components = config[targetSite]
     components['key'] = fileTools.readJsonFile('keys.json')[targetSite]
-    
     components['arguments'] = arguments
     components['dates'] = dates
     components['boolean'] = boolean
