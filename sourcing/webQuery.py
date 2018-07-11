@@ -158,7 +158,7 @@ def getPage(url,parameters,json=True):
 
     try:
         page = requests.get(url,params = parameters)
-    except ConnectionError:
+    except requests.exceptions.ConnectionError:
         logging.warning('ConnectionError, retrying')
         retryPage(url,1,5)
 
@@ -182,9 +182,8 @@ def retryPage(url,parameters,tries,maxTries,json=True):
 
         try:
              page = requests.get(url,params = parameters)
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             retryPage(url,parameters,tries,maxTries)
-
     else:
         logging.critical('page not reachable?')
         page = []

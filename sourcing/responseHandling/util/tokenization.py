@@ -2,7 +2,8 @@
 import re
 import nltk
 import enchant
-import autocorrect
+
+import sys
 
 PStemmer = nltk.PorterStemmer()
 englishDict = enchant.Dict('en_US')
@@ -49,4 +50,15 @@ def spellcheckSentence(sentence,tolerance):
 
     return(valid)
 
-#####################################################
+#####################################
+# Very strict sentence cleaning
+# currently removes ALL sentences will spelling errors(!)
+# Filter script, feed it text, recieve standard text.
+
+if __name__ == '__main__':
+    input = sys.stdin.readlines()
+    sentences = [sent.rstrip() for sent in input]
+
+    sentences = [prepSentence(sent) for sent in sentences]
+
+    [sys.stdout.write(sentence+'\n') for sentence in sentences]

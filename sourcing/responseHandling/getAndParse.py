@@ -6,8 +6,16 @@ import re
 import unidecode
 import collections
 
+#####################################
+
 class ResponseError(Exception):
     pass
+
+#####################################
+
+def wordcount(sentence):
+    c = collections.Counter(sentence.split(' '))
+    return([*c.values()])
 
 #####################################
 
@@ -15,28 +23,46 @@ def getSentences(url,tag):
 
     time.sleep(0.5)
 
+    def tryForHtml(url,tries=0,limit=6):
+
+        if tries < limit:
+            try:
+                r = requests.get(url)
+            except requests.exceptions.ConnectionError:
+                delay = 1 + (1*tries)
+                logging.warning('connection error for %s!'%(url))
+                logging.warning('sleeping for ... %i'%(delay))
+                time.sleep(delay)
+                tries += 1
+                html = tryForHtml(url,tries=tries)
+            except request.exceptions.HTTPError:
+                logging.warning('http-error for %s!'%(url))
+                html = ''
+            except request.exceptions.Timeout:
+                logging.warning('%s timed out!'%(url))
+                html = ''
+            except:
+                logging.warning('some other exception...')
+                html = ''
+            else:
+                html = r.text
+
+        else:
+            html = ''
+
+        return(html)
+
+
     print('Retrieving sentences from %s (with %s)'%(url,tag))
 
-    try:
-        r = requests.get(url)
-    except ConnectionError:
-        print('ConnectionError!')
-        time.sleep(5)
-        getSentences(url,tag)
-        #TODO some more error handling (bad response)
-    else:
-        html = r.text
+    html = tryForHtml(url,limit=6)
 
     try:
         sentences = parseHtml(html,tag=tag)
     except ResponseError:
-        sentences = ['NA']
+        sentences = 'na'
 
     return(sentences)
-
-def wordcount(sentence):
-    c = collections.Counter(sentence.split(' '))
-    return([*c.values()])
 
 #####################################
 
@@ -62,7 +88,7 @@ def parseHtml(html,tag="articleBody"):
         sentences = re.sub(r'[^a-z \.]',' ',sentences)
         sentences = re.sub(r' +',' ',sentences)
         sentences = sentences.split('.')
-        sentences = [sent.strip() for sent in sentences]
+
         return(sentences)
 
     def check(sentence):
@@ -75,7 +101,7 @@ def parseHtml(html,tag="articleBody"):
         raise ResponseError('bad tag')
     else:
         sentences = process(body)
-        sentences = [sent for sent in sentences if check(sent)]
+        sentences = '\n'.join([sent for sent in sentences if check(sent)])
 
     return(sentences)
 

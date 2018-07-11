@@ -4,7 +4,7 @@ import logging
 import re
 import pandas as pd
 
-from . import getSentences
+from . import getAndParse
 
 from collections import deque
 
@@ -19,10 +19,15 @@ The standard format is like this:
 
 keys = ('date','headline','body','source')
 
-date is the publication date
-headline is the headline, not processed
-body is a list of sentences
-source is a url.
+### ''date'' is the publication date
+
+### ''headline'' is the headline, not processed
+
+### ''body'' is a string of newline-separated sentences
+
+### ''source'' is a url.
+
+### ''id'' is added to the article when it is appended to the database.
 
 '''
 #####################################
@@ -33,20 +38,6 @@ def recursiveIndex(dict,keys):
     while keys:
         out = out[keys.popleft()]
     return(out)
-
-#####################################
-
-def tryTagsForText(url,tags):
-    body = ['NA']
-
-    while body == ['NA'] and tags != []:
-        currTag = tags.pop()
-        body = getSentences.getSentences(url,tag=currTag)
-
-    if body == ['NA']:
-        pass #TODO replace default?
-
-    return(body)
 
 #####################################
 
@@ -65,7 +56,7 @@ def generalizeFormat(jsonArticle,source):
             url = recursiveIndex(jsonArticle,profile['source'])
         except KeyError:
             logging.warning('Not able to get body, no URL in article file')
-            body = ['NA']
+            body = 'na'
 
         tags = profile['scrapeTags']
         body = tryTagsForText(url,tags)
@@ -80,3 +71,17 @@ def generalizeFormat(jsonArticle,source):
             out[key] = 'NA'
 
     return(out)
+
+#####################################
+
+def tryTagsForText(url,tags):
+    body = 'na'
+
+    while body == 'na' and tags != []:
+        currTag = tags.pop()
+        body = getAndParse.getSentences(url,tag=currTag)
+
+    if body == 'na':
+        pass #TODO replace default?
+
+    return(body)

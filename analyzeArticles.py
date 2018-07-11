@@ -7,7 +7,7 @@ import json
 import csv
 
 from sourcing import webQuery
-from sourcing.responseHandling import standardization as stdization
+from sourcing.responseHandling import format
 
 from io import StringIO
 
@@ -24,7 +24,7 @@ except FileNotFoundError:
     pages = webQuery.executeQuery(testTarget,testArguments)
 
     docs = pages
-    docs = [stdization.generalizeFormat(doc,source=testTarget) for doc in docs]
+    docs = [format.generalizeFormat(doc,source=testTarget) for doc in docs]
 
     try:
         with open('testTemp/.json','w') as file:
