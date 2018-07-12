@@ -64,7 +64,7 @@ def processText(text):
         #TODO implement logging
         valid = len(sentence) > 0
         valid &= len(sentence.split(' ')) > 1
-        valid &= all(count < 4 for count in wordcount(sentence))
+        valid &= all(count < 8 for count in wordcount(sentence))
         if not valid:
             fl.warning('Pruning sentence %s'%(sentence))
         return(valid)
