@@ -7,6 +7,24 @@ import collections
 
 import sys
 
+try:
+    from . import moduleTools
+except (ModuleNotFoundError,ImportError):
+    import moduleTools
+
+#####################################
+
+import logging
+from logging.config import dictConfig
+import yaml
+
+loggingPath = moduleTools.relPath('../logging.yaml',__file__)
+with open(loggingPath) as file:
+    logConf = yaml.load(file)
+dictConfig(logConf)
+
+fl = logging.getLogger('base_file')
+
 #####################################
 
 class ResponseError(Exception):
@@ -47,6 +65,8 @@ def processText(text):
         valid = len(sentence) > 0
         valid &= len(sentence.split(' ')) > 1
         valid &= all(count < 4 for count in wordcount(sentence))
+        if not valid:
+            fl.warning('Pruning sentence %s'%(sentence))
         return(valid)
 
     text = process(text)
