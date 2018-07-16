@@ -80,7 +80,7 @@ if __name__ == '__main__':
             sys.stderr.write(error)
 
     for article in articles:
-        article['id'] = '_'.join([target]+list(arguments))
+        article['id'] = '_'.join([target]+list(arguments)+[startYr,endYr])
 
     articles = json.dumps(articles) + '\n'
     sys.stdout.write(articles)
