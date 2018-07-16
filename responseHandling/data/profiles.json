@@ -1,0 +1,57 @@
+{
+  "nyt":
+  {
+    "request?":true,
+
+    "bodyCandidates":
+    [
+      {
+        "type":"p",
+        "attr":"class",
+        "regex":"story-body-text"
+      },
+      {
+        "type":"div",
+        "attr":"class",
+        "regex":"(B|b)ody"
+      }
+    ],
+
+    "date":["pub_date"],
+    "headline":["headline","main"],
+    "body":["snippet"],
+    "source":["web_url"]
+  },
+  "guardian":
+  {
+    "request?":true,
+
+    "bodyCandidates":
+    [
+      {
+        "type":"div",
+        "attr":"class",
+        "regex":"article-body"
+      },
+      {
+        "type":"div",
+        "attr":"class",
+        "regex":"reviewBody"
+      },
+      {
+        "type":"div",
+        "attr":"class",
+        "regex":"description"
+      }
+    ],
+
+    "scrapeTags":["description","reviewBody","articleBody"],
+
+    "date":["webPublicationDate"],
+    "headline":["webTitle"],
+    "body":["body"],
+    "source":["webUrl"]
+
+  }
+
+}

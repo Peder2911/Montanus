@@ -1,0 +1,61 @@
+16/07-12:45:29|INFO - glocations.contains Mozambique organizations Frelimo @ nyt
+16/07-12:45:31|INFO - scoping @ https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=glocations.contains%3A%28%22Mozambique%22%29+AND+organizations%3A%28%22Frelimo%22%29&begin_date=19890101&end_date=20180101&api-key=cb6460d1b450415e986f27254b10d179
+16/07-12:45:31|INFO - Hits=5 (pages=1)
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence 
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence 
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence 
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:45:39|WARNING - Pruning sentence .
+16/07-12:59:29|INFO - glocations.contains Guinea @ nyt
+16/07-12:59:31|INFO - scoping @ https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=glocations.contains%3A%28%22Guinea%22%29&begin_date=20000101&end_date=20181231&api-key=cb6460d1b450415e986f27254b10d179
+16/07-12:59:31|INFO - Hits=586 (pages=59)
