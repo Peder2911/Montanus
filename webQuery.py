@@ -177,7 +177,7 @@ def getPage(url,parameters,json=True,returnUrl=False):
         page = requests.get(url,params = parameters)
     except requests.exceptions.ConnectionError:
         fl.warning('ConnectionError, retrying!')
-        retryPage(url,1,5)
+        retryPage(url,parameters,1,5)
 #        logging.warning('ConnectionError, retrying')
 
     url = page.url

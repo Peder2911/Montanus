@@ -27,6 +27,7 @@ def processText(text):
 
         text = re.sub(r"('|’)s",' ',text)
         text = re.sub(r"n('|’)t",' not',text)
+        text = re.sub(r"('|’)d",' would',text)
 
         text = re.sub(r'[0-9]{4}','year',text)
         text = re.sub(r'[0-9]{1,2}(nd|rd|th)','date',text)
