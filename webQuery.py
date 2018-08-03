@@ -101,7 +101,6 @@ def subQuery(components,dates,page=0):
 #        print('Subdividing query...')
 
         beginDate,endDate = dates
-        #WARNING if there is more than 2000 hits in a year, things get wierd.
 
         durations = dateTimeTools.dateDurations(beginDate,endDate)
 
@@ -154,6 +153,7 @@ def queryScope(url,parameters,components):
         hits = hitsIndexer(response)
     else:
         fl.warning('Response not good.')
+        hits = 0
 
     if hits > 0:
         pages = ((hits-1) // 10)+1
@@ -166,27 +166,24 @@ def queryScope(url,parameters,components):
 
 #####################################
 
-def getPage(url,parameters,json=True,returnUrl=False):
+def getPage(url,parameters,json=True,returnUrl=False,**kwargs):
     time.sleep(config['interval'])
 #    print('')
 #    print('Getting %s'%(url))
 #    for key,param in parameters.items():
 #        print('%s=%s'%(key,param))
 
+
+
     try:
-        page = requests.get(url,params = parameters)
+        page = requests.get(url,params = parameters,**kwargs)
     except requests.exceptions.ConnectionError:
         fl.warning('ConnectionError, retrying!')
         retryPage(url,parameters,1,5)
 #        logging.warning('ConnectionError, retrying')
 
     url = page.url
-
-    if json:
-        page = page.json()
-
-    else:
-        page = page.text
+    page = page.json()
 
 #    print('')
 #    print(url)

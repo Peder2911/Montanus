@@ -1,19 +1,10 @@
-This is an interface to the NYT and Guardian APIs.
-The program gets data from these APIs, and writes it to csv-files in the "dyads"-
-folder. This data will eventually be analyzed in interesting ways!
+This is an interface to several (currently only two) APIs for retrieving news data.
+The data is returned in a standardized json-format, after simple text cleaning.
+This makes it possible to analyze data from diverse sources in a single framework.
+See https://github.com/Peder2911/Diverse_Folio_Isle for an example on how this can be done.
 
-The scraper is written in python, and uses a couple of
-external libraries (see requirements.txt). The
-analysis-pipeline will be based on R.
-
-Will eventually form the input-part of an analysis
-pipeline, so no article-data will be stored locally. This
-tool is not mean to be used to gather and store
-information; it should only be used for analysis.
-
-Please cite if you distribute or use
-
-Maintained by Peder Gotch Landsverk @ PRIO (Peace Research Institute of Oslo)
-pglandsverk@gmail.com
-
----
+Usage:
+./getArticles.py {query}
+This returns the json-formatted articles to stdout.
+The query formatting is specific to each source, see f.ex:
+https://developer.nytimes.com/article_search_v2.json#/Documentation/GET/articlesearch.json

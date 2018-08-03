@@ -1,4 +1,3 @@
-.gitignore
 keys.json
 snippet.py
 __pycache__/
@@ -8,6 +7,9 @@ dyads/*
 
 analysis/classifiedData/*
 !analysis/classifiedData/.gitkeep
+
+logs/*
+!logs/.gitkeep
 
 locations.csv
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from bs4 import BeautifulSoup
 import requests
 import time
@@ -6,6 +7,7 @@ import unidecode
 import collections
 
 import sys
+import io
 
 class ResponseError(Exception):
     pass
@@ -28,6 +30,8 @@ def processText(text):
         text = re.sub(r"('|’)s",' ',text)
         text = re.sub(r"n('|’)t",' not',text)
         text = re.sub(r"('|’)d",' would',text)
+        text = re.sub(r"i('|’)m",'i am',text)
+        text = re.sub(r"i('|’)ll",'i will',text)
 
         text = re.sub(r'[0-9]{4}','year',text)
         text = re.sub(r'[0-9]{1,2}(nd|rd|th)','date',text)
@@ -48,7 +52,7 @@ def processText(text):
         #TODO implement logging
         valid = len(sentence) > 0
         valid &= len(sentence.split(' ')) > 1
-        valid &= all(count < 8 for count in wordcount(sentence))
+        valid &= all(count < 10 for count in wordcount(sentence))
         if not valid:
             sys.stderr.write('Pruning sentence %s\n'%(sentence))
         return(valid)
@@ -62,7 +66,12 @@ def processText(text):
 #####################################
 
 if __name__ == '__main__':
-    input = sys.stdin.read()
+
+    try:
+        input = sys.stdin.read()
+    except UnicodeDecodeError:
+        sys.stderr.write('\nInput has wrong encoding: %s'%(sys.stdin.encoding))
+        sys.exit(1)
 
     output = processText(input)
 
