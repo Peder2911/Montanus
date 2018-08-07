@@ -5,12 +5,22 @@ import time
 import re
 import unidecode
 import collections
+#from nltk import sent_tokenize as nltk_sent_tokenize
 
 import sys
 import io
 
 class ResponseError(Exception):
     pass
+
+#####################################
+
+'''
+This script performs simple non-destructive text cleaning, by substituting
+known analogues (ex. ´|‘|’ with '), and translating all characters to unicode.
+
+Outputs newline-separated sentences.
+'''
 
 #####################################
 
@@ -21,45 +31,50 @@ def wordcount(sentence):
 #####################################
 
 def processText(text):
-    err = ''
 
     def process(text):
 
-        text = text.lower()
+        # Abbreviations ?
+#        text = re.sub(r"('|’)s",' ',text,flags=re.IGNORECASE)
+#        text = re.sub(r"n('|’)t",' not',text,flags=re.IGNORECASE)
+#        text = re.sub(r"('|’)d",' would',text,flags=re.IGNORECASE)
+#        text = re.sub(r"i('|’)m",'i am',text,flags=re.IGNORECASE)
+#        text = re.sub(r"i('|’)ll",'i will',text,flags=re.IGNORECASE)
 
-        text = re.sub(r"('|’)s",' ',text)
-        text = re.sub(r"n('|’)t",' not',text)
-        text = re.sub(r"('|’)d",' would',text)
-        text = re.sub(r"i('|’)m",'i am',text)
-        text = re.sub(r"i('|’)ll",'i will',text)
 
-        text = re.sub(r'[0-9]{4}','year',text)
-        text = re.sub(r'[0-9]{1,2}(nd|rd|th)','date',text)
-        text = re.sub(r'\w*\.\w{2,3}',' url ',text)
-        text = re.sub(r'(mr\.|ms\.)',' pronoun ',text)
-        text = re.sub(r'(inc\.)','abbreviation',text)
 
-        text = re.sub(r'[\n\,-]',' ',text)
+        # Years and dates should be migrated?
+#        text = re.sub(r'\b(19|20)\d{2}\b','year',text,flags=re.IGNORECASE)
+#        text = re.sub(r'[0-9]{1,2}(nd|rd|th)','date',text,flags=re.IGNORECASE)
 
+        # URL regex
+
+        # num2words
+
+
+        # Standardize apostrophes
+        standardizationTable = {'‘':'\'','’':'\'','´':'\'','`':'\'',
+                                '“':'\"','”':'\"',
+                                '–':'-'}
+        text = text.translate(standardizationTable)
+
+        # Translate non-unicode chars
         text = unidecode.unidecode(text)
-        text = re.sub(r'[^a-z \.\!\?]',' ',text)
-        text = re.sub(r' +',' ',text)
+
+        # Remove existing newlines.
+#        text = text.replace('\n',' ')
+
+        # Trim sequential whitespace
+        text = re.sub(r'\s\s+',' ',text,flags=re.IGNORECASE)
+
+        # Trim leading and trailing whitespace
+        text = text.strip()
 
         return(text)
 
-    def check(sentence):
-
-        #TODO implement logging
-        valid = len(sentence) > 0
-        valid &= len(sentence.split(' ')) > 1
-        valid &= all(count < 10 for count in wordcount(sentence))
-        if not valid:
-            sys.stderr.write('Pruning sentence %s\n'%(sentence))
-        return(valid)
-
     text = process(text)
-    sentences = re.split(r'(\.|\?|\!)',text)
-    text = '\n'.join([sent.strip() for sent in sentences if check(sent)])
+#    sentences = nltk_sent_tokenize(text)
+#    text = '\n'.join(sentences)
 
     return(text)
 

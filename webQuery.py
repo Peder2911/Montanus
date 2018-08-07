@@ -21,6 +21,11 @@ class QueryError(Exception):
 
 #####################################
 
+def errPrint(message):
+    print(message,file = sys.stderr,flush = True)
+
+#####################################
+
 with open(moduleTools.relPath('configFiles/sourceProfiles.json',__file__)) as file:
     config = json.load(file)
 
@@ -46,7 +51,7 @@ fl = logging.getLogger('base_file')
 def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
 
     qS = ' '.join(arguments)
-    fl.info('%s @ %s'%(qS,targetSite))
+    errPrint('%s @ %s'%(qS,targetSite))
 
     #WARNING this function is impure...
 
@@ -129,10 +134,10 @@ def subQuery(components,dates,page=0):
             if responseChecker(response):
                 articles += contentIndexer(response)
             else:
-                fl.warning('Response not good.')
+                errPrint('Response not good.')
 
     else:
-        fl.warning('No articles...')
+        errPrint('No articles...')
         articles = []
 
     return(articles)
@@ -147,12 +152,12 @@ def queryScope(url,parameters,components):
 #    print('Scoping query...')
 
     response,rUrl = getPage(url,parameters,returnUrl=True)
-    fl.info('scoping @ %s'%(rUrl))
+    errPrint('scoping @ %s'%(rUrl))
 
     if responseChecker(response):
         hits = hitsIndexer(response)
     else:
-        fl.warning('Response not good.')
+        errPrint('Response not good.')
         hits = 0
 
     if hits > 0:
@@ -160,7 +165,8 @@ def queryScope(url,parameters,components):
     else:
         pages = 0
 
-    fl.info('Hits=%s (pages=%s)'%(hits,pages))
+    errPrint('Hits=%s (pages=%s)'%(hits,pages))
+    errPrint('est time: %i sec @ %g sec interval'%(pages*config['interval'],config['interval']))
 
     return(hits,pages)
 
@@ -168,25 +174,18 @@ def queryScope(url,parameters,components):
 
 def getPage(url,parameters,json=True,returnUrl=False,**kwargs):
     time.sleep(config['interval'])
-#    print('')
-#    print('Getting %s'%(url))
-#    for key,param in parameters.items():
-#        print('%s=%s'%(key,param))
-
-
 
     try:
         page = requests.get(url,params = parameters,**kwargs)
+
     except requests.exceptions.ConnectionError:
-        fl.warning('ConnectionError, retrying!')
-        retryPage(url,parameters,1,5)
-#        logging.warning('ConnectionError, retrying')
+        errPrint('ConnectionError, retrying!')
+        page = retryPage(url,parameters,1,5)
+    else:
+        errPrint('\nGot %s'%(page.url))
+        page = page.json()
 
-    url = page.url
-    page = page.json()
 
-#    print('')
-#    print(url)
 
     if returnUrl:
         return(page,url)
@@ -201,16 +200,14 @@ def retryPage(url,parameters,tries,maxTries,json=True):
         try:
             page = requests.get(url,params = parameters)
         except requests.exceptions.ConnectionError:
-            fl.warning('Try %i failed! Retrying...'%(tries))
+            errPrint('Try %i failed! Retrying...'%(tries))
             retryPage(url,parameters,tries,maxTries)
+        else:
+            page = page.json()
     else:
-        fl.critical('Not able to reach %s'%(url))
+        errPrint('Not able to reach %s'%(url))
+        fl.warning('Unable to reach %s'%(url))
         page = []
-
-    if json:
-        page = page.json()
-    else:
-        page = page.text
 
     return(page)
 

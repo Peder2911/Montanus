@@ -3,16 +3,26 @@
 
 import requests as rq
 from bs4 import BeautifulSoup as bs
+from collections import deque
 
 import re
 import os
 import json
+import time
+
+import logging
 
 import sys
 
 #####################################
 
-path = os.path.join(os.path.dirname(__file__),'../data/profiles.json')
+def errReport(message):
+    print(message,file=sys.stderr)
+    sys.stderr.flush()
+
+#####################################
+
+path = os.path.join(os.path.dirname(__file__),'./data/profiles.json')
 with open(path) as file:
     profile = json.load(file)
 
@@ -26,14 +36,22 @@ def matchList(pattern,list):
     matches = any([re.search(pattern,entry) for entry in list])
     return(matches)
 
+def recursiveIndex(dict,keys):
+    keys = deque(keys)
+    out = dict
+    while keys:
+        out = out[keys.popleft()]
+    return(out)
+
 #####################################
 
-def getArticleBody(url,source):
+def request(article,source,profile):
 
+    url = recursiveIndex(article,profile['source'])
     html = tryForHtml(url,limit=6)
 
     soup = bs(html,'html.parser')
-    prof = profile[source]['bodyCandidates']
+    prof = profile['bodyCandidates']
     prof.reverse()
 
     text = ''
@@ -78,27 +96,29 @@ def tryForHtml(url,tries=0,limit=6):
             r = rq.get(url)
         except rq.exceptions.ConnectionError:
             delay = 1 + (1*tries)
-            logging.warning('connection error for %s!'%(url))
-            logging.warning('sleeping for ... %i'%(delay))
+#            processTools.errPrint('connection error for %s!'%(url))
+#            processTools.errPrint('sleeping for ... %i'%(delay))
             time.sleep(delay)
             tries += 1
             html = tryForHtml(url,tries=tries)
 
         except rq.exceptions.HTTPError:
-            logging.warning('http-error for %s!'%(url))
+#            processTools.errPrint('http-error for %s!'%(url))
             html = ''
 
         except rq.exceptions.Timeout:
-            logging.warning('%s timed out!'%(url))
+#            processTools.errPrint('%s timed out!'%(url))
             html = ''
 
         except:
-            logging.warning('some other exception...')
+#            processTools.errPrint('some other exception...')
             html = ''
         else:
             html = r.text
+            errReport('Retrieved body from %s'%(r.url))
     else:
         html = ''
+#        processTools.errPrint('No body from %s'%(url))
 
     return(html)
 

@@ -6,7 +6,19 @@ import pandas as pd
 import subprocess
 import sys
 
+try:
+    from . import getBody
+except ImportError:
+    import getBody
+
 from collections import deque
+
+
+#####################################
+
+def errReport(message):
+    print(message,file=sys.stderr)
+    sys.stderr.flush()
 
 #####################################
 
@@ -44,11 +56,11 @@ def recursiveIndex(dict,keys):
 def pipeText(text,script):
     scriptPath = relPath(script,__file__)
     script_py = ['python',scriptPath]
-    p = subprocess.run(script_py,input=text.encode(),
-                       stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p = subprocess.run(script_py,
+                       stdout = subprocess.PIPE,
+                       input=text.encode())
     out = p.stdout.decode()
-    err = p.stderr.decode()
-    return(out,err)
+    return(out)
 
 #####################################
 
@@ -59,36 +71,28 @@ def relPath(filePath,fileVar):
 
 #####################################
 
-def generalizeFormat(article,source,clean=True,tokenize=False):
-    err = ''
+def generalize(article,source,clean=True,tokenize=False):
 
-    path = relPath('./data/profiles.json',__file__)
-    with open(path) as file:
+    proPath = relPath('./data/profiles.json',__file__)
+
+    with open(proPath) as file:
         profile = json.load(file)[source]
 
     out = {}
     keys = ('date','headline','source')
 
     if profile['request?']:
-        url = recursiveIndex(article,profile['source'])
-
-        getBody_py = relPath('./pipes/getBody.py',__file__)
-        call = ['python',getBody_py,source,url]
-        p = subprocess.run(call,stdout=subprocess.PIPE)
-        body = p.stdout.decode()
-
+        body = getBody.request(article,source,profile)
     else:
         body = recursiveIndex(article,profile['body'])
 
     if clean:
-        body,err_t = pipeText(body,'./pipes/textCleaning.py')
-        err += err_t
+        body = pipeText(body,'./pipes/textCleaning.py')
     else:
         pass
 
     if tokenize:
-        body,err_t = pipeText(body,'./pipes/tokenization.py')
-        err += err_t
+        body = pipeText(body,'./pipes/tokenization.py')
     else:
         pass
 
@@ -99,24 +103,22 @@ def generalizeFormat(article,source,clean=True,tokenize=False):
             out[key] = recursiveIndex(article,profile[key])
         except KeyError:
 #            logging.warning('%s not in article'%(key))
-            err += '%s not in article'%(key)
             out[key] = 'NA'
 
-    return(out,err)
+    return(out)
 
 #####################################
-
+'''
 if __name__ == '__main__':
+    sys.stdin.flush()
     articles = json.load(sys.stdin)
     source = sys.argv[1]
 
     genArticles = []
-    err = ''
 
-    for art in articles:
-        out, err_t = generalizeFormat(art,source)
+    for n,art in enumerate(articles):
+        out = generalizeFormat(art,source)
         genArticles.append(out)
-        err += err_t + '\n'
 
-    sys.stderr.write(err)
     sys.stdout.write(json.dumps(genArticles))
+'''

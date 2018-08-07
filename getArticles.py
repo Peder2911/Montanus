@@ -9,9 +9,17 @@ import json
 from collections import deque
 
 from tools import moduleTools
+from responseHandling import rHandling
+
 import webQuery
 
 # import dbTools
+
+#####################################
+
+def errReport(message):
+    print(message,file=sys.stderr)
+    sys.stderr.flush()
 
 #####################################
 
@@ -33,6 +41,7 @@ fl = logging.getLogger('base_file')
 
 if __name__ == '__main__':
 
+    # defaults
     startYr = '1989_01_01'
     endYr = '2018_01_01'
 
@@ -60,27 +69,22 @@ if __name__ == '__main__':
         articles = webQuery.executeQuery(
                     target, arguments, boolean=boolean, dates=(startYr,endYr))
     except QueryError as e:
-        fl.warning(e)
-        articles = []
+        sys.stderr.write(e)
 
-    processArticles_py = moduleTools.relPath('responseHandling/processArticles.py',__file__)
-    processArticles_py = ['python',processArticles_py,target]
+    with open('testResources/preGen.json','w') as file:
+        json.dump(articles,file)
 
-    processArticles_py = subprocess.run(processArticles_py,
-                                        input = json.dumps(articles).encode(),
-                                        stdout = subprocess.PIPE,
-                                        stderr = subprocess.PIPE)
-    out = processArticles_py.stdout.decode()
-    err = processArticles_py.stderr.decode()
+    genArticles = []
+    for n,article in enumerate(articles):
+        errReport('(%i of %i)'%(n+1,len(articles)))
+        genArticles.append(rHandling.generalize(article,target))
+    for article in genArticles:
+        article.update({'id':'_'.join([target]+list(arguments)+[startYr,endYr])})
 
-    articles = json.loads(out)
-    for error in err.split('\n'):
-        if error != '':
-            fl.warning(error)
-            sys.stderr.write(error)
+    articles = json.dumps(genArticles)
 
-    for article in articles:
-        article['id'] = '_'.join([target]+list(arguments)+[startYr,endYr])
+    with open('testResources/getArticles.json','w') as file:
+        file.write(articles)
 
-    articles = json.dumps(articles) + '\n'
-    sys.stdout.write(articles)
+    print(articles,file = sys.stdout, flush = True)
+    sys.exit(0)
