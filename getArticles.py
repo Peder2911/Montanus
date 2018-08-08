@@ -75,8 +75,8 @@ if __name__ == '__main__':
         sys.stderr.write(e)
         articles = []
 
-    with open('testResources/preGen.json','w') as file:
-        json.dump(articles,file)
+#    with open('testResources/preGen.json','w') as file:
+#        json.dump(articles,file)
 
     genArticles = []
     for n,article in enumerate(articles):
@@ -87,8 +87,8 @@ if __name__ == '__main__':
 
     articles = json.dumps(genArticles)
 
-    with open('testResources/getArticles.json','w') as file:
-        file.write(articles)
+#    with open('testResources/getArticles.json','w') as file:
+#        file.write(articles)
 
     print(articles,file = sys.stdout, flush = True)
     sys.exit(0)
