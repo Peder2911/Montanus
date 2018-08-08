@@ -21,6 +21,9 @@ def errReport(message):
     print(message,file=sys.stderr)
     sys.stderr.flush()
 
+class QueryError(Exception):
+    pass
+
 #####################################
 
 import logging
@@ -70,6 +73,7 @@ if __name__ == '__main__':
                     target, arguments, boolean=boolean, dates=(startYr,endYr))
     except QueryError as e:
         sys.stderr.write(e)
+        articles = []
 
     with open('testResources/preGen.json','w') as file:
         json.dump(articles,file)
