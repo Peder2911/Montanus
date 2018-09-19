@@ -1,0 +1,12 @@
+{
+ "name":"Montanus web scraper",
+ "interpreter":"python3",
+ "executable":"getArticles.py",
+ "options":
+ {
+	 "target site":"listmenu NYT,Guardian",
+	 "location":"freetext",
+	 "startdate":"freetext",
+	 "enddate":"freetext"
+ }
+}

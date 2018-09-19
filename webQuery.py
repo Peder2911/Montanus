@@ -33,6 +33,7 @@ with open(moduleTools.relPath('configFiles/keys.json',__file__)) as file:
     keys = json.load(file)
 
 #####################################
+# Again with this logging stuff...
 
 import logging
 from logging.config import dictConfig
@@ -46,14 +47,15 @@ dictConfig(logConf)
 
 fl = logging.getLogger('base_file')
 
+# Logging doghouse
 #####################################
+
+cl = logging.getLogger('console')
 
 def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
 
-    qS = ' '.join(arguments)
-    errPrint('%s @ %s'%(qS,targetSite))
-
-    #WARNING this function is impure...
+    # This "components" stuff might point towards the fact that
+    # this stuff should done in a class?
 
     components = config[targetSite]
     components['key'] = keys[targetSite]
@@ -68,20 +70,21 @@ def executeQuery(targetSite,arguments,dates=(False,False),boolean="AND"):
     responseChecker = pageTools.makeChecker(components,fl)
     #######
 
-    # Sub def. dates
+    # If bad or no dates, substitutes default dates
     if all(dates) is False:
         beginDate = dateTimeTools.getDefaultDate('begin')
         endDate = dateTimeTools.getDefaultDate('end')
         dates = (beginDate,endDate)
-
+        cl.debug('dates substituted by defaults')
 
     # Remove bad dates...
     if all(dateTimeTools.checkBaseFormat(date) for date in dates):
         pass
     else:
         articles = executeQuery(targetSite,arguments,dates=(False,False),boolean=boolean)
+        cl.debug('date format not recognized!')
 
-    # Prep over
+    # This is where the magic happens
     articles = subQuery(components,dates)
 
     return(articles)
@@ -212,6 +215,7 @@ def retryPage(url,parameters,tries,maxTries,json=True):
     return(page)
 
 #####################################
+# Ergh...
 
 def adaptedParameters(components,page,dates):
     parameters = {}
@@ -229,4 +233,5 @@ def adaptedParameters(components,page,dates):
 
     return(parameters)
 
+# erghhhh...
 #####################################
