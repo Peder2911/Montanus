@@ -71,7 +71,7 @@ def relPath(filePath,fileVar):
 
 #####################################
 
-def generalize(article,source,clean=True,tokenize=False):
+def generalize(article,source):
 
     proPath = relPath('./data/profiles.json',__file__)
 
@@ -86,21 +86,24 @@ def generalize(article,source,clean=True,tokenize=False):
     else:
         body = recursiveIndex(article,profile['body'])
 
-    if clean:
-        body = pipeText(body,'./pipes/textCleaning.py')
-    else:
-        pass
-
-    if tokenize:
-        body = pipeText(body,'./pipes/tokenization.py')
-    else:
-        pass
-
-    out['body'] = body
+#    if clean:
+#        body = pipeText(body,'./pipes/textCleaning.py')
+#    else:
+#        pass
+#
+#    if tokenize:
+#        body = pipeText(body,'./pipes/tokenization.py')
+#    else:
+#        pass
+    
+    out['body'] = body.replace('\n',' ')
 
     for key in keys:
         try:
-            out[key] = recursiveIndex(article,profile[key])
+            field = recursiveIndex(article,profile[key])
+            field = field.replace('\n',' ')
+            out[key] = field 
+
         except KeyError:
 #            logging.warning('%s not in article'%(key))
             out[key] = 'NA'

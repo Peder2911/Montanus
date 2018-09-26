@@ -2,6 +2,7 @@
  "name":"Montanus web scraper",
  "interpreter":"python3",
  "executable":"getArticles.py",
+ "args":"--dfi",
  "options":
  {
 	 "target site":"listmenu NYT,Guardian",
