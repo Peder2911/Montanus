@@ -17,7 +17,6 @@ from collections import deque
 from tools import moduleTools
 from responseHandling import rHandling
 
-from lib import RedisFile
 from lib import LodWriter
 
 import webQuery
@@ -60,7 +59,9 @@ cl = logging.getLogger('console')
 if __name__ == '__main__':
 
     if '--dfi' in sys.argv:
+        from dfitools import RedisFile
         # DFI compatible    
+        
         config = json.load(sys.stdin) 
         
         target = config['target site'].lower()
