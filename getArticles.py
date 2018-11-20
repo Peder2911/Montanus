@@ -116,9 +116,11 @@ if __name__ == '__main__':
     for article in genArticles:
         article.update({'id':'_'.join([target]+list(arguments)+[startdate,enddate])})
 
-    fauxfile = io.StringIO()
-    Writer = LodWriter.LodWriter(genArticles,fauxfile)
-    Writer.write()
-    data = fauxfile.getvalue()
+    genArticles = [json.dumps(a) for a in genArticles]
+    data = '\n'.join(genArticles)
 
+    #fauxfile = io.StringIO()
+    #Writer = LodWriter.LodWriter(genArticles,fauxfile)
+    #Writer.write()
+    #data = fauxfile.getvalue()
     outFile.write(data)
